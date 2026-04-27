@@ -619,7 +619,30 @@ async function loadPopup() {
   setText("topVendors", formatTopVendors(profile));
   setText("topCategories", formatTopCategories(profile));
   setText("profileWhy", formatProfileWhy(profile));
-  renderSignalBreakdown(profile.signalBreakdown);
+  const summary = profile.lastDeepSummary || null;
+
+const signals =
+  (profile.signalBreakdown && Object.keys(profile.signalBreakdown).length > 0)
+    ? profile.signalBreakdown
+    : (summary?.signalBreakdown || {});
+
+setText("topSignals", formatTopSignals(signals));
+
+const vendors =
+  (profile.requestClassification?.vendors && Object.keys(profile.requestClassification.vendors).length > 0)
+    ? profile.requestClassification.vendors
+    : {};
+
+setText("topVendors", formatTopVendors({ requestClassification: { vendors } }));
+
+const categories =
+  (profile.requestClassification?.categories && Object.keys(profile.requestClassification.categories).length > 0)
+    ? profile.requestClassification.categories
+    : (summary?.signalBreakdown || {});
+
+setText("topCategories", formatTopCategories({ requestClassification: { categories } }));
+
+renderSignalBreakdown(signals);
   setText("runLog", formatRunLog(profile.runLog));
   setText("recentFindings", formatFindings(profile.recentFindings));
   setText("reasoning", reasoning.explanation || "No reasoning yet.");
