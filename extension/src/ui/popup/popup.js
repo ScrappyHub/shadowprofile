@@ -108,6 +108,52 @@ function formatLastDeepSummary(summary) {
     parts.length ? "Top signals: " + parts.slice(0,4).join(", ") : "Top signals: none"
   ].join("\n");
 }
+
+function formatTopSignals(breakdown) {
+  const entries = Object.entries(breakdown || {})
+    .filter(([, value]) => Number(value || 0) > 0)
+    .sort((a,b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 6);
+
+  if (!entries.length) return "No top signals yet.";
+
+  return entries
+    .map(([key, value]) => key.replaceAll("_", " ") + ": " + value)
+    .join("\n");
+}
+
+function formatTopTrackerDomains(domains) {
+  const entries = Object.entries(domains || {})
+    .filter(([domain, value]) => domain && Number(value || 0) > 0)
+    .sort((a,b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 8);
+
+  if (!entries.length) return "No tracker domains observed yet.";
+
+  return entries
+    .map(([domain, value]) => domain + ": " + value)
+    .join("\n");
+}
+
+function formatProfileWhy(profile) {
+  const signals = Object.entries(profile.signalBreakdown || {})
+    .filter(([, value]) => Number(value || 0) > 0)
+    .sort((a,b) => Number(b[1]) - Number(a[1]))
+    .map(([key]) => key.replaceAll("_", " "));
+
+  const reasons = [];
+
+  if (signals.includes("tracking pixel")) reasons.push("Tracking pixel requests were observed.");
+  if (signals.includes("telemetry")) reasons.push("Behavior telemetry endpoints were observed.");
+  if (signals.includes("recommendation")) reasons.push("Recommendation or feed activity was observed.");
+  if (signals.includes("cart")) reasons.push("Cart-related activity was observed.");
+  if (signals.includes("checkout")) reasons.push("Checkout-related activity was observed.");
+  if (signals.includes("beacon")) reasons.push("Beacon-style requests were observed.");
+
+  if (!reasons.length) return "No explanation yet.";
+
+  return reasons.join("\n");
+}
 function formatTime(value) {
   if (typeof value !== "number") {
     return "--";
@@ -542,6 +588,9 @@ async function loadPopup() {
   setText("evidenceTrackerCount", trackerSummary.tracker_domain_count ?? "--");
 
   setText("lastDeepSummary", formatLastDeepSummary(profile.lastDeepSummary));
+  setText("topSignals", formatTopSignals(profile.signalBreakdown));
+  setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
+  setText("profileWhy", formatProfileWhy(profile));
   renderSignalBreakdown(profile.signalBreakdown);
   setText("runLog", formatRunLog(profile.runLog));
   setText("recentFindings", formatFindings(profile.recentFindings));
