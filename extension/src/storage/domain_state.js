@@ -581,6 +581,8 @@ export async function closeDeepInspectRun(domain) {
     totalEvents: counts.total_events || 0,
     requestEvents: (counts.request_events || 0) + (counts.response_events || 0),
     signalBreakdown: buildSignalBreakdown(state),
+    vendors: { ...(state.request_classification?.vendors || {}) },
+    categories: { ...(state.request_classification?.categories || {}) },
     findings: Array.isArray(state.recent_findings) ? state.recent_findings.slice(-8) : []
   };
 

@@ -618,7 +618,7 @@ async function loadPopup() {
   setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
   setText("topVendors", formatTopVendors(profile));
   setText("topCategories", formatTopCategories(profile));
-  setText("profileWhy", formatProfileWhy(profile));
+  setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
   const summary = profile.lastDeepSummary || null;
 
 const signals =
@@ -631,14 +631,14 @@ setText("topSignals", formatTopSignals(signals));
 const vendors =
   (profile.requestClassification?.vendors && Object.keys(profile.requestClassification.vendors).length > 0)
     ? profile.requestClassification.vendors
-    : {};
+    : (summary?.vendors || {});
 
 setText("topVendors", formatTopVendors({ requestClassification: { vendors } }));
 
 const categories =
   (profile.requestClassification?.categories && Object.keys(profile.requestClassification.categories).length > 0)
     ? profile.requestClassification.categories
-    : (summary?.signalBreakdown || {});
+    : (summary?.categories || summary?.signalBreakdown || {});
 
 setText("topCategories", formatTopCategories({ requestClassification: { categories } }));
 
