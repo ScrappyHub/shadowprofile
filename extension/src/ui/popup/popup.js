@@ -610,36 +610,31 @@ async function loadPopup() {
   setText("integrityChecked", formatTime(evidence.integrity_checked_at));
   setText("evidenceTotalEvents", eventCounts.total_events ?? "--");
   setText("requestEvents", eventCounts.request_events ?? "--");
-  setText("evidenceTrackerCount", trackerSummary.tracker_domain_count ?? "--");
+  setText("evidenceTrackerCount", trackerSummary.tracker_domain_count ?? "--");  setText("lastDeepSummary", formatLastDeepSummary(profile.lastDeepSummary));
 
-  setText("lastDeepSummary", formatLastDeepSummary(profile.lastDeepSummary));
-  setText("topSignals", formatTopSignals(profile.signalBreakdown));
-  setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
-  setText("topVendors", formatTopVendors(profile));
-  setText("topCategories", formatTopCategories(profile));
-  setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
   const summary = profile.lastDeepSummary || null;
 
-const liveSignals = profile.signalBreakdown || {};
-const signals = Object.values(liveSignals).some((v) => Number(v || 0) > 0)
-  ? liveSignals
-  : (summary?.signalBreakdown || {});
+  const liveSignals = profile.signalBreakdown || {};
+  const signals = Object.values(liveSignals).some((v) => Number(v || 0) > 0)
+    ? liveSignals
+    : (summary?.signalBreakdown || {});
 
-const liveVendors = profile.requestClassification?.vendors || {};
-const vendors = Object.values(liveVendors).some((v) => Number(v || 0) > 0)
-  ? liveVendors
-  : (summary?.vendors || {});
+  const liveVendors = profile.requestClassification?.vendors || {};
+  const vendors = Object.values(liveVendors).some((v) => Number(v || 0) > 0)
+    ? liveVendors
+    : (summary?.vendors || {});
 
-const liveCategories = profile.requestClassification?.categories || {};
-const categories = Object.values(liveCategories).some((v) => Number(v || 0) > 0)
-  ? liveCategories
-  : (summary?.categories || summary?.signalBreakdown || {});
+  const liveCategories = profile.requestClassification?.categories || {};
+  const categories = Object.values(liveCategories).some((v) => Number(v || 0) > 0)
+    ? liveCategories
+    : (summary?.categories || summary?.signalBreakdown || {});
 
-setText("topSignals", formatTopSignals(signals));
-setText("topVendors", formatTopMap(vendors, "No vendors observed yet."));
-setText("topCategories", formatTopMap(categories, "No categories observed yet."));
-setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
-renderSignalBreakdown(signals);
+  setText("topSignals", formatTopSignals(signals));
+  setText("topVendors", formatTopMap(vendors, "No vendors observed yet."));
+  setText("topCategories", formatTopMap(categories, "No categories observed yet."));
+  setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
+  setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
+  renderSignalBreakdown(signals);
   setText("runLog", formatRunLog(profile.runLog));
   setText("recentFindings", formatFindings(profile.recentFindings));
   setText("reasoning", reasoning.explanation || "No reasoning yet.");
