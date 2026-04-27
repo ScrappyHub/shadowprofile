@@ -109,6 +109,31 @@ function formatLastDeepSummary(summary) {
   ].join("\n");
 }
 
+
+function formatTopMap(map, emptyText) {
+  const entries = Object.entries(map || {})
+    .filter(([,v]) => Number(v || 0) > 0)
+    .sort((a,b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 8);
+
+  if (!entries.length) return emptyText;
+
+  return entries.map(([k,v]) => k + ": " + v).join("\n");
+}
+
+function formatTopVendors(profile) {
+  return formatTopMap(
+    profile.requestClassification?.vendors,
+    "No vendors observed yet."
+  );
+}
+
+function formatTopCategories(profile) {
+  return formatTopMap(
+    profile.requestClassification?.categories,
+    "No categories observed yet."
+  );
+}
 function formatTopSignals(breakdown) {
   const entries = Object.entries(breakdown || {})
     .filter(([, value]) => Number(value || 0) > 0)
@@ -590,6 +615,8 @@ async function loadPopup() {
   setText("lastDeepSummary", formatLastDeepSummary(profile.lastDeepSummary));
   setText("topSignals", formatTopSignals(profile.signalBreakdown));
   setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
+  setText("topVendors", formatTopVendors(profile));
+  setText("topCategories", formatTopCategories(profile));
   setText("profileWhy", formatProfileWhy(profile));
   renderSignalBreakdown(profile.signalBreakdown);
   setText("runLog", formatRunLog(profile.runLog));
