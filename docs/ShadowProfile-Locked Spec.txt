@@ -1,0 +1,604 @@
+# ShadowProfile — Step 1 Locked Specification
+
+## Project identity
+
+**Name:** ShadowProfile
+**Type:** Standalone browser forensic extension
+**Primary purpose:** Expose the observable tracking, profiling, and personalization machinery websites use against the user.
+**Secondary purpose:** Compare what a site shows to an established user versus what it may show to a fresh or minimally tracked visitor.
+
+## Mission
+
+ShadowProfile should let a user answer:
+
+* Which websites tracked me the most?
+* What identifiers and behavioral signals did they collect?
+* What evidence suggests personalization or profiling?
+* Which third parties were involved?
+* How much of what I saw may differ from what a fresh visitor would see?
+
+ShadowProfile is **forensic and evidence-first**. It should not claim to know hidden proprietary algorithms unless they are directly exposed. It should clearly separate:
+
+* **Observed** — directly seen in the browser
+* **Correlated** — strongly linked from multiple observed signals
+* **Inferred** — likely but not directly proven
+* **Unknown** — not knowable from extension evidence alone
+
+---
+
+## Core product surfaces
+
+### 1. Live page inspector
+
+A per-site forensic view showing what is happening right now on the active page.
+
+It should include:
+
+* scripts loaded
+* cookies written, read, changed, or reused
+* localStorage and sessionStorage changes
+* indexedDB presence and activity indicators
+* network requests tied to analytics, ads, recommendations, experiments, or profile updates
+* DOM/content changes after user actions
+* likely fingerprinting signals
+* recommendation or feed refresh indicators
+
+### 2. Dashboard
+
+A cross-site dashboard summarizing the user’s browsing history during the extension’s observation window.
+
+It should show:
+
+* websites ranked by tracking intensity
+* websites ranked by number of identifiers stored
+* websites ranked by number of third-party calls
+* websites ranked by probable personalization activity
+* websites ranked by persistence over time
+* daily and weekly summaries
+* top tracker domains encountered across all sites
+* top vendors or categories encountered
+
+### 3. Fresh-view comparator
+
+A controlled feature that estimates how the site may appear to a fresh or minimally tracked visitor.
+
+This should be framed carefully.
+
+ShadowProfile must not say "this is exactly what a brand new account would see" unless it actually generated a clean comparison state. Instead it should say one of:
+
+* **Estimated fresh view**
+* **Reduced-profile view**
+* **Fresh-state simulation**
+* **Limited-confidence fresh comparison**
+
+### 4. Evidence explorer
+
+An inspectable event and evidence viewer for researchers and power users.
+
+It should support:
+
+* timeline navigation
+* filtering by event type
+* evidence cards
+* confidence level
+* storage and request linkage
+* export to JSON report
+
+---
+
+## Dashboard requirements
+
+The dashboard is a locked surface.
+
+### Main sections
+
+#### A. Most tracking-heavy websites
+
+Each site gets a score and card showing:
+
+* site/domain
+* total sessions observed
+* total cookies/IDs seen
+* storage writes
+* third-party domains contacted
+* probable fingerprinting signals
+* probable replay/analytics signals
+* probable personalization signals
+* tracking intensity score
+* personalization activity score
+
+#### B. Top tracker domains
+
+Examples:
+
+* analytics domains
+* ad-tech domains
+* CDN-hosted tracking scripts
+* experimentation vendors
+* recommendation vendors
+* session replay vendors
+
+#### C. Your profiling exposure over time
+
+Charts for:
+
+* tracking events by day
+* unique websites observed
+* third-party calls over time
+* persistent identifiers over time
+* personalization-linked activity over time
+
+#### D. Fresh-view comparison summary
+
+For sites where comparison is possible, show:
+
+* tracked session view vs reduced-profile estimate
+* likely changed modules
+* likelihood that feed, ads, recommendations, search ranking, or offers differ
+* comparison confidence
+
+---
+
+## Fresh-view comparator — realistic design
+
+This is possible in limited, evidence-based ways.
+
+## What is realistically possible
+
+ShadowProfile can support several comparison levels.
+
+### Level 0 — Heuristic estimate
+
+No real alternate session is created.
+The extension infers that content is likely personalized because:
+
+* persistent IDs are present
+* known recommendation or experimentation endpoints are active
+* page regions mutate after actions
+* storage tokens or bucket IDs persist across visits
+* logged-in state exists
+
+Output example:
+
+> This site is likely not showing a fresh/default experience. Persistent identifiers, experiment tokens, and behavior-linked refreshes were observed.
+
+### Level 1 — Reduced-profile local simulation
+
+The extension compares the site before and after removing or isolating local state where technically allowed.
+
+Examples:
+
+* compare current DOM against a state after clearing extension-observable site cookies/storage in a controlled test session
+* compare visible modules before and after reducing known local identifiers
+
+This is more useful than pure heuristic, but still not the same as a true fresh account.
+
+### Level 2 — Controlled clean-profile comparison
+
+In a stronger implementation, ShadowProfile can open a controlled clean browsing context with:
+
+* no login state
+* cleared site storage
+* limited persisted cookies
+* reduced extension-observed identifiers
+
+Then compare:
+
+* scripts loaded
+* requests fired
+* visible modules
+* ad or recommendation slots
+* ranking order changes
+* UI differences
+
+This is the strongest practical feature, but it depends on browser-extension capabilities and must be tested carefully against browser restrictions.
+
+### Level 3 — Multi-profile research mode
+
+Longer-term, ShadowProfile can support comparisons between:
+
+* normal user session
+* clean guest session
+* reduced-profile session
+* consent accepted vs rejected session
+* active account vs logged-out session
+
+This becomes a genuine differential personalization lab.
+
+## Locked truth rule for fresh-view
+
+ShadowProfile must never claim exactness unless exactness is earned.
+
+Allowed labels:
+
+* Estimated fresh-state difference
+* Reduced-profile comparison
+* Clean-state comparison
+* Observed session difference
+
+Disallowed label unless fully proven:
+
+* This is exactly what every new user sees
+
+---
+
+## Scoring model
+
+## 1. Tracking Intensity Score
+
+Measures how aggressively a site appears to track the user.
+
+Inputs may include:
+
+* total first-party cookies
+* total third-party cookies
+* persistent IDs detected
+* local/session storage writes
+* indexedDB presence
+* network beacons per minute
+* third-party domains count
+* fingerprinting indicators
+* session replay indicators
+
+## 2. Personalization Activity Score
+
+Measures how much evidence points to adaptive or personalized behavior.
+
+Inputs may include:
+
+* recommendation-related endpoints
+* experiment or bucket identifiers
+* profile/segment terminology in requests or storage
+* content mutation after click/scroll/dwell
+* feed refreshes tied to interaction
+* ad slot refresh behavior
+* search/result re-ranking indicators
+
+## 3. Persistence Score
+
+Measures how sticky the tracking identity appears to be.
+
+Inputs may include:
+
+* same identifier reused across visits
+* multi-storage redundancy
+* long-lived cookie expirations
+* repeated session linkage
+
+## 4. Transparency Score
+
+Measures how visible and limited the site’s tracking behavior is.
+
+Inputs may include:
+
+* clear consent flow observed
+* fewer hidden third-party calls
+* fewer persistent identifiers
+* fewer covert signals
+* lower evidence of silent profiling
+
+Every score must be explainable from evidence.
+
+---
+
+## Event model
+
+ShadowProfile should use a normalized evidence event schema.
+
+### Core event types
+
+* page_visit
+* script_loaded
+* cookie_set
+* cookie_changed
+* cookie_deleted
+* storage_write
+* storage_delete
+* indexeddb_detected
+* request_sent
+* response_received
+* tracker_detected
+* fingerprinting_signal
+* session_replay_signal
+* experiment_signal
+* recommendation_signal
+* profile_signal
+* dom_mutation
+* user_action
+* content_refresh
+* comparison_run
+* comparison_diff
+
+### Each event should include
+
+* event_id
+* timestamp
+* tab_id
+* top_level_url
+* frame_url if relevant
+* event_type
+* source_category
+* domain
+* third_party boolean
+* confidence
+* evidence_summary
+* raw_details subset
+* linkage IDs to related events
+
+---
+
+## Heuristic categories
+
+ShadowProfile should begin with explainable rules, not black-box scoring.
+
+### Categories
+
+* analytics
+* advertising
+* retargeting
+* recommendation/personalization
+* experimentation/A-B testing
+* session replay
+* heatmap/behavior capture
+* fingerprinting/device identity
+* consent framework
+* identity/session management
+
+### Example rule patterns
+
+#### Recommendation/personalization indicators
+
+* endpoint names containing recommendation, recommender, ranking, feed, foryou, suggested, affinity, segment, profile, personalization
+* dynamic content blocks changing after behavior
+* persistent segment or bucket IDs in storage
+
+#### Experimentation indicators
+
+* storage keys or requests containing bucket, variant, experiment, ab, treatment, cohort
+
+#### Fingerprinting indicators
+
+* suspicious calls around canvas, audio, font, WebGL, hardware, timezone, language entropy, battery, plugins, device memory, concurrency
+
+#### Replay indicators
+
+* vendors or scripts known for session replay
+* dense behavioral event capture patterns
+
+---
+
+## MVP scope — locked
+
+ShadowProfile MVP should include:
+
+### Capture
+
+* request observation
+* cookie and storage observation
+* script inventory
+* DOM mutation observation after user actions
+* known-vendor matching
+* heuristic classification engine
+
+### UI
+
+* popup summary for current site
+* full dashboard
+* current-site evidence timeline
+* top tracked sites ranking
+* exportable report
+
+### Fresh-view MVP
+
+For MVP, include:
+
+* heuristic fresh-state estimate
+* optional reduced-profile comparison design stub
+
+Do **not** make the MVP depend on a perfect clean-account simulator.
+That should be a Phase 2 feature.
+
+---
+
+## Technical architecture
+
+### Extension layers
+
+#### 1. Background/service worker
+
+Responsible for:
+
+* network event intake
+* domain/vendor classification
+* session aggregation
+* score calculation
+* persistence of evidence summaries
+
+#### 2. Content scripts
+
+Responsible for:
+
+* DOM mutation monitoring
+* page script inventory clues
+* storage observation hooks where feasible
+* page-level interaction correlation
+
+#### 3. Dashboard app
+
+Responsible for:
+
+* cross-site summaries
+* evidence browsing
+* comparison views
+* charts and rankings
+
+#### 4. Rules engine
+
+Responsible for:
+
+* explainable classification
+* evidence confidence calculation
+* site scoring
+* fresh-state estimate generation
+
+---
+
+## Data model — initial entities
+
+### SiteProfile
+
+* domain
+* first_seen
+* last_seen
+* sessions_count
+* tracking_intensity_score
+* personalization_activity_score
+* persistence_score
+* transparency_score
+* top_tracker_domains
+* top_evidence_types
+
+### SessionRecord
+
+* session_id
+* domain
+* started_at
+* ended_at
+* page_urls
+* identifiers_seen
+* third_parties_seen
+* event_counts
+* comparison_available
+
+### EvidenceEvent
+
+* event_id
+* session_id
+* timestamp
+* type
+* domain
+* third_party
+* confidence
+* summary
+* details
+
+### ComparisonRecord
+
+* comparison_id
+* domain
+* comparison_type
+* baseline_mode
+* comparison_mode
+* differences_found
+* confidence
+* notes
+
+---
+
+## Phase roadmap
+
+## Phase 1 — Forensic Observer MVP
+
+* current-site tracker and personalization evidence
+* dashboard with ranked websites
+* evidence timeline
+* known vendor detection
+* scoring system
+* exportable evidence report
+
+## Phase 2 — Reduced-profile comparison
+
+* controlled site-state reset comparisons where feasible
+* compare tracked session to reduced-profile session
+* DOM and request diff summaries
+
+## Phase 3 — Clean-state research mode
+
+* stronger comparison contexts
+* optional multi-profile comparisons
+* consent-state comparisons
+* logged-in vs logged-out differential views
+
+---
+
+## Product language rules
+
+ShadowProfile must use precise wording.
+
+Preferred language:
+
+* observed
+* likely
+* inferred
+* evidence-backed
+* probable personalization
+* reduced-profile estimate
+* clean-state comparison
+
+Avoid:
+
+* exact secret algorithm exposed
+* total proof of backend model behavior
+* complete profile contents recovered
+* every piece of stolen data identified
+
+---
+
+## Locked design decisions
+
+* ShadowProfile is a standalone extension first.
+* It is forensic, not conspiratorial.
+* The dashboard is a first-class surface, not an afterthought.
+* Ranking websites by tracking intensity is a core feature.
+* Showing an estimated or controlled fresh-state comparison is a core differentiator.
+* Evidence must always be explainable.
+* MVP stays lightweight and extension-realistic.
+
+---
+
+## Step 1 deliverables
+
+Step 1 should produce these artifacts:
+
+### A. Product law / truth contract
+
+Defines what ShadowProfile can and cannot claim.
+
+### B. MVP feature contract
+
+Defines what ships in Phase 1.
+
+### C. Event schema v1
+
+Defines evidence event types and fields.
+
+### D. Score model v1
+
+Defines tracking/personalization/persistence/transparency scoring.
+
+### E. Dashboard layout v1
+
+Defines the main dashboard cards and ranking views.
+
+### F. Fresh-view comparator spec v1
+
+Defines Level 0 and Level 1 comparison behavior for early builds.
+
+---
+
+## Recommended next build step
+
+**Step 2:** Generate the actual implementation scaffold.
+
+That means:
+
+* Manifest structure
+* folder tree
+* background worker skeleton
+* content script skeleton
+* event schema file
+* rules engine file
+* dashboard page skeleton
+* sample mocked data for the dashboard
+
+That is the right next move to make ShadowProfile real.

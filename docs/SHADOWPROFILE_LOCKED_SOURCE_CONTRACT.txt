@@ -1,0 +1,699 @@
+ShadowProfile — Locked Source Contracts v1
+
+This document contains the first authoritative source contracts for ShadowProfile.
+
+These contracts are the implementation authority for the initial build. Code, UI, scoring, exports, and roadmap decisions must conform to these contracts.
+
+1. SHADOWPROFILE_PRODUCT_LAW_v1
+1.1 Identity
+
+Name: ShadowProfile
+Type: Standalone forensic browser instrument with extension surfaces
+Primary role: Observe, normalize, classify, and present browser-visible evidence of tracking, profiling, and personalization behavior used by websites.
+
+ShadowProfile is not a truth oracle for hidden backend systems. It is an evidence-first instrument that measures browser-observable behavior and renders bounded conclusions.
+
+1.2 Mission
+
+ShadowProfile exists to help a user answer:
+
+Which websites tracked me the most?
+What identifiers and signals were observed?
+What evidence suggests profiling or personalization?
+Which third parties were involved?
+What likely differs between a persistent session and a reduced-profile or fresh-state session?
+1.3 Product law
+
+ShadowProfile must obey these rules:
+
+Rule 1 — Evidence first
+
+Every user-facing conclusion must be grounded in observed browser evidence, not rhetorical assumptions.
+
+Rule 2 — Bound claims
+
+ShadowProfile must distinguish what it observed from what it inferred.
+
+Rule 3 — Explainability required
+
+Every score, ranking, and finding must be explainable from supporting evidence.
+
+Rule 4 — No secret-algorithm overclaiming
+
+ShadowProfile must never claim to have extracted a company’s exact hidden ranking model or backend algorithm unless that exact logic is directly exposed and captured.
+
+Rule 5 — Forensic posture
+
+The product must behave like an investigator, not a propaganda tool.
+
+Rule 6 — Dashboard must drill down
+
+All cross-site summaries must support site-level and event-level explanation.
+
+Rule 7 — Fresh-state honesty
+
+Any “fresh account” or “fresh visitor” statement must clearly indicate whether it is an estimate, a reduced-profile comparison, or a controlled clean-state comparison.
+
+Rule 8 — Extension is a surface, not the whole product
+
+The extension UI is one delivery surface for a broader evidence engine. Raw capture, normalization, classification, and reporting are first-class parts of the system.
+
+1.4 Truth vocabulary
+
+ShadowProfile must use the following terms consistently.
+
+Observed
+
+Directly captured in the browser or extension-visible runtime.
+
+Examples:
+
+a cookie was set
+a request was sent to a third-party domain
+a DOM region changed after scroll
+a storage key persisted across visits
+Correlated
+
+Multiple observed events form a strong relationship.
+
+Examples:
+
+user scroll followed by request burst followed by content refresh
+persistent ID reused across multiple requests and visits
+Inferred
+
+Likely conclusion based on evidence patterns, but not directly proven.
+
+Examples:
+
+probable recommendation refresh
+probable experiment bucket assignment
+probable profiling signal usage
+Unknown
+
+Cannot be determined from available evidence.
+
+Examples:
+
+exact server-side ranking weights
+unseen backend profile fields
+exact internal targeting policy
+1.5 Allowed claims
+
+ShadowProfile may say:
+
+tracking behavior was observed
+persistent identifiers were observed
+probable personalization signals were detected
+evidence suggests the page is not showing a neutral default experience
+reduced-profile comparison suggests the experience differs
+1.6 Disallowed claims
+
+ShadowProfile must not say:
+
+this is the company’s exact algorithm
+this proves every piece of data they possess
+this is exactly what every new account would see
+this site definitely stole all of your data
+1.7 Product surfaces
+
+ShadowProfile must support these surfaces:
+
+A. Current-site inspector
+
+Forensic current-site summary and evidence timeline.
+
+B. Dashboard
+
+Cross-site ranking and exposure summary.
+
+C. Evidence explorer
+
+Inspectable event and finding view.
+
+D. Fresh-state comparison surface
+
+Estimated or controlled comparison outputs with clear confidence and limits.
+
+E. Export/report surface
+
+Deterministic structured export of evidence and findings.
+
+1.8 MVP law
+
+The MVP must focus on:
+
+evidence capture
+event normalization
+explainable classification
+current-site inspector
+ranked dashboard
+exportable findings
+
+The MVP must not depend on a perfect new-account simulator.
+
+2. SHADOWPROFILE_EVENT_SCHEMA_v1
+2.1 Purpose
+
+This schema defines the stable internal evidence objects used by ShadowProfile.
+
+The schema exists so that:
+
+capture logic is consistent
+classification logic is traceable
+exports are stable
+UI can render findings without inventing missing meaning
+2.2 Atomic object: EvidenceEvent
+
+Every captured item is represented as an EvidenceEvent.
+
+2.3 Required EvidenceEvent fields
+event_id — stable unique identifier for the event
+session_id — session association
+timestamp — ISO 8601 timestamp
+event_type — canonical event type token
+domain — effective top-level site domain
+top_level_url — active page URL
+frame_url — frame URL when relevant
+source — capture source, such as background, content, injected, derived
+third_party — boolean indicating whether the event is associated with a third-party domain relative to the top-level site
+category — initial normalized category
+confidence — numeric or discrete confidence label
+explanation — short explanation of what the event means
+evidence_summary — user-renderable short summary
+details — structured data payload specific to event type
+related_event_ids — linked events where applicable
+2.4 Canonical event types
+
+ShadowProfile v1 must support these event types:
+
+page_visit
+tab_activated
+tab_closed
+script_loaded
+cookie_set
+cookie_changed
+cookie_deleted
+storage_write
+storage_delete
+indexeddb_detected
+request_sent
+response_received
+tracker_detected
+fingerprinting_signal
+session_replay_signal
+experiment_signal
+recommendation_signal
+profile_signal
+user_action
+dom_mutation
+content_refresh
+comparison_run
+comparison_diff
+finding_emitted
+2.5 Details contract by event family
+Request events
+
+request_sent and response_received should support:
+
+request URL
+request method
+request domain
+resource type if available
+initiator
+status code if available
+content hints if available
+matched vendor or rule IDs
+Cookie events
+
+cookie_set, cookie_changed, cookie_deleted should support:
+
+cookie name
+cookie domain
+path
+secure flag
+httpOnly flag when visible
+sameSite if available
+expiration if available
+change cause if available
+value fingerprint or truncated safe representation, not reckless raw exposure
+Storage events
+
+storage_write, storage_delete should support:
+
+storage area type
+key
+key classification hints
+value fingerprint or safe representation
+DOM events
+
+dom_mutation and content_refresh should support:
+
+mutation target clue
+change type
+changed region clue
+nearby user action ID if linked
+estimated significance
+Interaction events
+
+user_action should support:
+
+action type
+target clue
+page position or region clue if available
+timestamp
+Derived signal events
+
+tracker_detected, fingerprinting_signal, session_replay_signal, experiment_signal, recommendation_signal, profile_signal should support:
+
+matched rule ID
+matched vendor ID if relevant
+source event IDs
+explanation
+confidence
+2.6 SessionRecord schema
+
+A SessionRecord is the normalized aggregate for a site session.
+
+Required fields:
+
+session_id
+domain
+tab_ids
+started_at
+ended_at
+page_count
+event_count
+request_count
+cookie_changes
+storage_changes
+dom_mutation_count
+user_action_count
+third_party_domains
+identifiers_seen
+findings
+2.7 SiteProfile schema
+
+A SiteProfile is the stable per-domain aggregate.
+
+Required fields:
+
+domain
+first_seen_at
+last_seen_at
+sessions_count
+unique_identifier_count
+cookie_event_count
+storage_event_count
+third_party_domain_count
+tracker_domain_count
+probable_personalization_event_count
+probable_fingerprinting_event_count
+probable_replay_event_count
+tracking_intensity_score
+personalization_activity_score
+persistence_score
+transparency_score
+fresh_state_estimate_available
+2.8 Finding schema
+
+A Finding is the user-facing, explainable conclusion object.
+
+Required fields:
+
+finding_id
+domain
+session_id
+type
+severity
+confidence
+title
+summary
+supporting_event_ids
+reasoning
+limits
+2.9 Schema law
+Event capture may be noisy, but normalized schema must remain stable.
+Findings must point back to events.
+UI must render the schema, not bypass it with ad hoc claims.
+3. SHADOWPROFILE_SCORING_MODEL_v1
+3.1 Purpose
+
+ShadowProfile scores are user-facing summaries of evidence density and behavior pattern severity.
+
+Scores are not meant to be mystical. They are compact rollups of explainable inputs.
+
+3.2 Score law
+Every score must support drill-down.
+No score may exist without input evidence.
+Scores are comparative aids, not absolute moral truth.
+3.3 Core scores
+A. Tracking Intensity Score
+
+Measures how aggressively a site appears to collect, persist, and spread user-linked browser-visible state.
+
+Suggested inputs:
+
+cookie event volume
+storage write volume
+unique identifier count
+third-party domain count
+request burst density
+tracker/vendor detections
+probable fingerprinting indicators
+probable replay indicators
+B. Personalization Activity Score
+
+Measures how much evidence suggests adaptive content, ranking, segmentation, or experience shaping.
+
+Suggested inputs:
+
+recommendation-related detections
+experiment/bucket detections
+profile/segment detections
+content refresh after interaction
+repeated behavior-linked request/change sequences
+page-region changes consistent with ranking or recommendation modules
+C. Persistence Score
+
+Measures how sticky the identity or state-tracking appears to be.
+
+Suggested inputs:
+
+repeated identifier reuse across visits
+identifiers across multiple storage surfaces
+long-lived cookies where visible
+repeated session linkage evidence
+D. Transparency Score
+
+Measures how visible, limited, or bounded the site’s tracking behavior appears to be.
+
+Suggested inputs:
+
+cleaner consent signals
+fewer covert third-party calls
+fewer persistent identifiers
+fewer hidden behavior-capture indicators
+lower evidence of silent profiling
+3.4 Score output form
+
+Each score should include:
+
+score value
+short explanation
+top contributing factors
+link to evidence/finding details
+3.5 Dashboard ranking law
+
+A site may be ranked by score, but the ranking card must include why.
+
+Minimum explanation fields for a dashboard card:
+
+main contributors
+notable tracker domains or identifiers
+whether the score is based mostly on storage, requests, behavior-linked changes, or vendor detections
+3.6 Prohibited score behavior
+
+ShadowProfile must not:
+
+produce opaque numbers with no explanation
+imply that a higher score proves illegal activity
+collapse all categories into a single dramatic label without nuance
+4. SHADOWPROFILE_FRESH_STATE_COMPARATOR_v1
+4.1 Purpose
+
+The fresh-state comparator exists to estimate or compare how a site behaves with reduced persistence or different profile state.
+
+It must be carefully bounded.
+
+4.2 Comparator law
+
+ShadowProfile must not equate every comparison result with “this is exactly what a brand-new user would see” unless a true controlled clean-state comparison was actually run and the limits are still disclosed.
+
+4.3 Allowed comparison modes
+Mode 0 — Fresh-state estimate
+
+A rules-based conclusion that the current experience is likely shaped by persistence, prior behavior, or stored state.
+
+Evidence examples:
+
+persistent identifiers present
+experiment bucket keys present
+profile/segment clues present
+repeated behavior-linked content changes
+Mode 1 — Reduced-profile comparison
+
+A structured comparison between the current persistent state and a state with reduced or removed local profile artifacts where technically feasible.
+
+Mode 2 — Controlled clean-state comparison
+
+A stronger comparison run using a cleaner context with no login state and reduced or cleared site persistence, if the actual extension/runtime architecture can support it honestly.
+
+4.4 Comparator output object
+
+ComparisonRecord required fields:
+
+comparison_id
+domain
+baseline_mode
+comparison_mode
+differences_detected
+confidence
+explanation
+limits
+
+Optional fields:
+
+changed modules
+changed request families
+changed scripts
+changed ad/recommendation regions
+changed storage footprint
+4.5 Fresh-state UI language
+
+Preferred phrases:
+
+Estimated fresh-state difference
+Reduced-profile comparison
+Clean-state comparison
+Limited-confidence comparison
+
+Forbidden phrase unless genuinely proven in context:
+
+This is exactly what every new account sees
+4.6 MVP comparator contract
+
+The MVP must implement:
+
+fresh-state estimate
+comparison record schema
+dashboard summary slot for comparison availability
+
+The MVP must not depend on a perfect clean-session generator.
+
+5. SHADOWPROFILE_RULES_ENGINE_v1
+5.1 Purpose
+
+The rules engine converts raw evidence into explainable categories, signals, and findings.
+
+It exists to keep ShadowProfile interpretable.
+
+5.2 Rules engine law
+Rules must be explainable.
+Rules must be inspectable.
+Findings must cite their supporting events.
+Vendor and signal categories must be separable.
+5.3 Rule families
+A. Vendor classification rules
+
+Map domains, scripts, or request patterns into categories such as:
+
+analytics
+advertising
+retargeting
+experimentation
+recommendation/personalization
+session replay
+heatmap/behavior capture
+consent framework
+identity/session management
+B. Signal classification rules
+
+Map event patterns into signals such as:
+
+probable fingerprinting
+probable recommendation activity
+probable experiment assignment
+probable profiling activity
+probable replay capture
+C. Finding emission rules
+
+Turn clusters of supporting events into user-facing findings.
+
+5.4 Rule object contract
+
+Each rule should have:
+
+rule_id
+rule_family
+title
+description
+match_conditions
+output_type
+confidence_behavior
+explanation_template
+5.5 Example rule patterns
+Recommendation/personalization clues
+
+Patterns may include:
+
+request or storage names containing terms like recommendation, feed, suggested, ranking, affinity, profile, segment, personalization
+user action followed by targeted request burst and content refresh
+persisted segment or cohort identifiers
+Experimentation clues
+
+Patterns may include:
+
+bucket, variant, experiment, ab, treatment, cohort tokens
+request families that appear tied to feature assignment
+Fingerprinting clues
+
+Patterns may include:
+
+suspicious clustering around canvas, audio, font, WebGL, language, device memory, hardware concurrency, timezone, or similar entropy collection behavior where observable
+Replay clues
+
+Patterns may include:
+
+known replay vendors
+dense behavior capture sequences
+scripts and request names consistent with session replay or interaction recording
+5.6 Finding law
+
+A finding may only be emitted if:
+
+it has at least one supporting event
+it has a confidence label
+it includes reasoning
+it includes limits
+5.7 MVP rules engine contract
+
+The MVP must prioritize:
+
+stable category mapping
+explainable signal detection
+clear low/medium/high confidence behavior
+findings that are easy to defend
+
+The MVP must avoid:
+
+speculative black-box scoring with no explanation
+dramatic language detached from evidence
+6. SHADOWPROFILE_BUILD_CONTRACT_v1
+6.1 Purpose
+
+This contract locks the build order so ShadowProfile is built as a deterministic instrument rather than a feature pile.
+
+6.2 Locked implementation order
+Phase 0
+
+Write and freeze source contracts.
+
+Phase 1
+
+Implement evidence substrate:
+
+requests
+cookies
+tabs/sessions
+DOM mutations
+interactions
+storage hooks
+Phase 2
+
+Implement normalization and aggregation:
+
+EvidenceEvent pipeline
+SessionRecord pipeline
+SiteProfile pipeline
+Finding object emission
+Phase 3
+
+Implement explainable rules:
+
+vendor classification
+signal classification
+score inputs
+findings
+Phase 4
+
+Implement current-site inspector.
+
+Phase 5
+
+Implement dashboard.
+
+Phase 6
+
+Implement fresh-state estimate and comparison record support.
+
+Phase 7
+
+Implement deterministic export/report support.
+
+6.3 Exit conditions
+Evidence substrate exit condition
+
+ShadowProfile can produce normalized events for a live browsing session.
+
+Aggregation exit condition
+
+ShadowProfile can summarize a session and site profile from captured events.
+
+Rules exit condition
+
+Each finding and score can explain itself.
+
+UI exit condition
+
+Dashboard and site inspector can drill from summary to evidence.
+
+Comparator exit condition
+
+Comparison outputs are carefully labeled and bounded.
+
+Export exit condition
+
+Evidence and findings can be exported in stable structured form.
+
+7. Immediate next build artifacts
+
+These are the next documents and implementation objects that should be produced directly from these contracts:
+
+Docs
+SHADOWPROFILE_MVP_CONTRACT_v1.md
+SHADOWPROFILE_DASHBOARD_LAYOUT_v1.md
+SHADOWPROFILE_VENDOR_CLASSIFICATION_v1.md
+Code-facing contracts
+event type constants
+rule family constants
+score input definitions
+finding severity/confidence enums
+comparison mode enums
+First implementation lane
+raw event schema file
+site/session aggregate model
+rule stubs
+evidence-to-finding mapping skeleton
+8. Lock status
+
+These contracts are now the initial authority for ShadowProfile.
+
+The correct next move is to turn them into:
+
+MVP contract
+dashboard layout contract
+vendor classification contract
+code-facing enums and model stubs
+
+Only after that should the real implementation substrate be written.

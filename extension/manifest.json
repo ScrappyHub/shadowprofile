@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "ShadowProfile",
+  "version": "0.1.0",
+  "description": "Forensic browser-visible tracking and personalization inspector.",
+  "background": {
+    "service_worker": "src/background/service_worker.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "cookies",
+    "webNavigation",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_title": "ShadowProfile",
+    "default_popup": "src/ui/popup/popup.html"
+  },
+  "options_page": "src/ui/dashboard/dashboard.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/content_entry.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

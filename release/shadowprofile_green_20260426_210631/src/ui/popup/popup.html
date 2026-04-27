@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ShadowProfile</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      padding: 0;
+      width: 360px;
+      font-family: Arial, sans-serif;
+      background: #0f1115;
+      color: #f3f4f6;
+    }
+    .wrap { padding: 14px; }
+    h1 { margin: 0 0 4px 0; font-size: 18px; }
+    .domain {
+      color: #9ca3af;
+      font-size: 12px;
+      margin-bottom: 10px;
+      word-break: break-all;
+    }
+    .mode {
+      font-size: 12px;
+      color: #86efac;
+      margin-bottom: 14px;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .controls button {
+      background: #1f2937;
+      color: #f3f4f6;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background: #273244;
+    }
+    .panel {
+      background: #171a21;
+      border: 1px solid #272b36;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .panel h2 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #d1d5db;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .metric {
+      background: #11141b;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .metric .label {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .metric .value {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .small {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+    .empty {
+      color: #9ca3af;
+      font-size: 12px;
+    }
+    #recentFindings, #runLog {
+      white-space: pre-line;
+    }
+    .signal-row {
+      margin: 6px 0;
+    }
+    .signal-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-bottom: 3px;
+    }
+    .signal-track {
+      height: 7px;
+      background: #111827;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .signal-fill {
+      height: 7px;
+      background: #93c5fd;
+      border-radius: 999px;
+    }
+    .status {
+      font-size: 12px;
+      color: #93c5fd;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>ShadowProfile</h1>
+    <div id="domain" class="domain">Loading...</div>
+    <div id="runtimeMode" class="mode">Mode: --</div>
+
+    <div class="controls">
+      <button id="reset-domain">Reset Site Summary</button>
+      <button id="toggle-mode">Start Deep Inspect</button>
+    </div>
+
+    <div class="panel">
+      <h2>Scores</h2>
+      <div class="grid">
+        <div class="metric"><div class="label">Tracking</div><div id="tracking" class="value">--</div></div>
+        <div class="metric"><div class="label">Personalization</div><div id="personalization" class="value">--</div></div>
+        <div class="metric"><div class="label">Persistence</div><div id="persistence" class="value">--</div></div>
+        <div class="metric"><div class="label">Transparency</div><div id="transparency" class="value">--</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Inferred Profile</h2>
+      <div class="small"><strong>Interests:</strong> <span id="interests">--</span></div>
+      <div class="small"><strong>Intent:</strong> <span id="intent">--</span></div>
+      <div class="small"><strong>Segments:</strong> <span id="segments">--</span></div>
+      <div class="small"><strong>Value:</strong> <span id="valueEstimate">--</span></div>
+      <div class="small"><strong>Confidence:</strong> <span id="confidence">--</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Integrity</h2>
+      <div class="small"><strong>Status:</strong> <span id="integrityStatus">--</span></div>
+      <div class="small"><strong>Build:</strong> <span id="buildIdentity">--</span></div>
+      <div class="small"><strong>Checks Passed:</strong> <span id="checksPassed">--</span></div>
+      <div class="small"><strong>Checks Failed:</strong> <span id="checksFailed">--</span></div>
+      <div class="small"><strong>Summary:</strong> <span id="integritySummary">--</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Evidence</h2>
+      <div class="small"><strong>Session Started:</strong> <span id="sessionStarted">--</span></div>
+      <div class="small"><strong>Session Ended:</strong> <span id="sessionEnded">--</span></div>
+      <div class="small"><strong>Duration (ms):</strong> <span id="sessionDuration">--</span></div>
+      <div class="small"><strong>Analysis Generated:</strong> <span id="analysisGenerated">--</span></div>
+      <div class="small"><strong>Integrity Checked:</strong> <span id="integrityChecked">--</span></div>
+      <div class="small"><strong>Total Events:</strong> <span id="evidenceTotalEvents">--</span></div>
+      <div class="small"><strong>Request Events:</strong> <span id="requestEvents">--</span></div>
+      <div class="small"><strong>Tracker Domains:</strong> <span id="evidenceTrackerCount">--</span></div>
+    </div>
+
+
+
+
+    <div class="panel">
+      <h2>Last Deep Inspect Summary</h2>
+      <div id="lastDeepSummary" class="small empty">No completed deep inspect run yet.</div>
+    </div>
+    <div class="panel">
+      <h2>Signal Breakdown</h2>
+      <div id="signalBreakdown" class="small empty">No signal breakdown yet.</div>
+    </div>
+
+    <div class="panel">
+      <h2>Run Log</h2>
+      <div id="runLog" class="small empty">No run log yet.</div>
+    </div>
+    <div class="panel">
+      <h2>Recent Findings</h2>
+      <div id="recentFindings" class="small empty">No findings yet.</div>
+    </div>
+    <div class="panel">
+      <h2>Reasoning</h2>
+      <div id="reasoning" class="small empty">No reasoning yet.</div>
+    </div>
+
+    <div class="panel">
+      <h2>Session Summary</h2>
+      <div class="small"><strong>Total Visits:</strong> <span id="totalVisits">--</span></div>
+      <div class="small"><strong>Total Events:</strong> <span id="totalEvents">--</span></div>
+      <div class="small"><strong>Tracker Domains:</strong> <span id="trackerCount">--</span></div>
+      <div class="small"><strong>Cookie Events:</strong> <span id="cookieCount">--</span></div>
+      <div class="small"><strong>Storage Events:</strong> <span id="storageCount">--</span></div>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
