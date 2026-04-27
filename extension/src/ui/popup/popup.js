@@ -451,6 +451,7 @@ function buildPopupViewModel(domain, state) {
     totalVisits: state.session_count || 0,
     totalEvents: safeObject(state.counts).total_events || 0,
     trackerDomains: safeObject(state.tracker_domains),
+    requestClassification: safeObject(state.request_classification),
     storageUsage: {
       cookie: safeObject(state.storage_summary).cookie_count || 0,
       local_storage: safeObject(state.storage_summary).local_storage_count || 0,
