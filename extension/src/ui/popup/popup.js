@@ -161,7 +161,8 @@ function formatTopTrackerDomains(domains) {
 }
 
 function formatProfileWhy(profile) {
-  const signals = Object.entries(profile.signalBreakdown || {})
+  const breakdown = profile?.signalBreakdown || profile?.lastDeepSummary?.signalBreakdown || {};
+  const signals = Object.entries(breakdown)
     .filter(([, value]) => Number(value || 0) > 0)
     .sort((a,b) => Number(b[1]) - Number(a[1]))
     .map(([key]) => key.replaceAll("_", " "));
@@ -175,9 +176,7 @@ function formatProfileWhy(profile) {
   if (signals.includes("checkout")) reasons.push("Checkout-related activity was observed.");
   if (signals.includes("beacon")) reasons.push("Beacon-style requests were observed.");
 
-  if (!reasons.length) return "No explanation yet.";
-
-  return reasons.join("\n");
+  return reasons.length ? reasons.join("\n") : "No explanation yet.";
 }
 function formatTime(value) {
   if (typeof value !== "number") {
@@ -621,27 +620,25 @@ async function loadPopup() {
   setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
   const summary = profile.lastDeepSummary || null;
 
-const signals =
-  (profile.signalBreakdown && Object.keys(profile.signalBreakdown).length > 0)
-    ? profile.signalBreakdown
-    : (summary?.signalBreakdown || {});
+const liveSignals = profile.signalBreakdown || {};
+const signals = Object.values(liveSignals).some((v) => Number(v || 0) > 0)
+  ? liveSignals
+  : (summary?.signalBreakdown || {});
+
+const liveVendors = profile.requestClassification?.vendors || {};
+const vendors = Object.values(liveVendors).some((v) => Number(v || 0) > 0)
+  ? liveVendors
+  : (summary?.vendors || {});
+
+const liveCategories = profile.requestClassification?.categories || {};
+const categories = Object.values(liveCategories).some((v) => Number(v || 0) > 0)
+  ? liveCategories
+  : (summary?.categories || summary?.signalBreakdown || {});
 
 setText("topSignals", formatTopSignals(signals));
-
-const vendors =
-  (profile.requestClassification?.vendors && Object.keys(profile.requestClassification.vendors).length > 0)
-    ? profile.requestClassification.vendors
-    : (summary?.vendors || {});
-
-setText("topVendors", formatTopVendors({ requestClassification: { vendors } }));
-
-const categories =
-  (profile.requestClassification?.categories && Object.keys(profile.requestClassification.categories).length > 0)
-    ? profile.requestClassification.categories
-    : (summary?.categories || summary?.signalBreakdown || {});
-
-setText("topCategories", formatTopCategories({ requestClassification: { categories } }));
-
+setText("topVendors", formatTopMap(vendors, "No vendors observed yet."));
+setText("topCategories", formatTopMap(categories, "No categories observed yet."));
+setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
 renderSignalBreakdown(signals);
   setText("runLog", formatRunLog(profile.runLog));
   setText("recentFindings", formatFindings(profile.recentFindings));
