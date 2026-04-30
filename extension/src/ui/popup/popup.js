@@ -633,7 +633,8 @@ async function loadPopup() {
   setText("topVendors", formatTopMap(vendors, "No vendors observed yet."));
   setText("topCategories", formatTopMap(categories, "No categories observed yet."));
   setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
-renderSignalBreakdown(signals);
+  setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
+  renderSignalBreakdown(signals);
   setText("runLog", formatRunLog(profile.runLog));
   setText("recentFindings", formatFindings(profile.recentFindings));
   setText("reasoning", reasoning.explanation || "No reasoning yet.");
