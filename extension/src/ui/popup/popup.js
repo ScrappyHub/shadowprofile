@@ -450,6 +450,7 @@ function buildPopupViewModel(domain, state) {
     totalVisits: state.session_count || 0,
     totalEvents: safeObject(state.counts).total_events || 0,
     trackerDomains: safeObject(state.tracker_domains),
+    endpointSummary: safeObject(state.endpoint_summary),
     requestClassification: safeObject(state.request_classification),
     storageUsage: {
       cookie: safeObject(state.storage_summary).cookie_count || 0,
@@ -632,6 +633,12 @@ async function loadPopup() {
   setText("topSignals", formatTopSignals(signals));
   setText("topVendors", formatTopMap(vendors, "No vendors observed yet."));
   setText("topCategories", formatTopMap(categories, "No categories observed yet."));
+  const liveEndpoints = profile.endpointSummary || {};
+  const endpoints = Object.values(liveEndpoints).some((v) => Number(v || 0) > 0)
+    ? liveEndpoints
+    : (summary?.endpoints || {});
+
+  setText("topEndpoints", formatTopMap(endpoints, "No endpoints observed yet."));
   setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
   setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
   renderSignalBreakdown(signals);

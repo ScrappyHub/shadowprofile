@@ -83,6 +83,7 @@ function createEmptyDomainState(domain, preserved = {}) {
     },
 
     tracker_domains: {},
+    endpoint_summary: {},
     request_classification: {
       categories: {},
       vendors: {},
@@ -263,6 +264,15 @@ function applyEventToDomainState(state, event) {
 
     state.request_classification.categories[category] = (state.request_classification.categories[category] || 0) + 1;
     state.request_classification.vendors[vendor] = (state.request_classification.vendors[vendor] || 0) + 1;
+
+    try {
+      const endpointPath = new URL(event.url || "").pathname || "/";
+      const endpointKey = category + " " + endpointPath.slice(0, 120);
+      state.endpoint_summary = state.endpoint_summary || {};
+      state.endpoint_summary[endpointKey] = (state.endpoint_summary[endpointKey] || 0) + 1;
+    } catch {
+      // ignore malformed URLs
+    }
 
     if (likelihood === "high" || likelihood === "medium" || likelihood === "low") {
       state.request_classification.tracker_likelihood[likelihood] =
@@ -583,6 +593,7 @@ export async function closeDeepInspectRun(domain) {
     signalBreakdown: buildSignalBreakdown(state),
     vendors: { ...(state.request_classification?.vendors || {}) },
     categories: { ...(state.request_classification?.categories || {}) },
+    endpoints: { ...(state.endpoint_summary || {}) },
     findings: Array.isArray(state.recent_findings) ? state.recent_findings.slice(-8) : []
   };
 
@@ -605,6 +616,7 @@ export async function closeDeepInspectRun(domain) {
     beacon_requests: 0
   };
   state.signal_breakdown = {};
+  state.endpoint_summary = {};
   state.recent_findings = [];
 
   pushRunLog(state, "Deep Inspect stopped");
