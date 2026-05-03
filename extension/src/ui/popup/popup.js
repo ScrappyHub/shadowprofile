@@ -110,6 +110,24 @@ function formatLastDeepSummary(summary) {
 }
 
 
+
+function formatRequestTimeline(entries) {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return "No request timeline yet.";
+  }
+
+  return entries
+    .slice(-10)
+    .reverse()
+    .map((entry) => {
+      const when = typeof entry.ts === "number" ? new Date(entry.ts).toLocaleTimeString() : "--";
+      const category = String(entry.category || "request").replaceAll("_", " ");
+      const vendor = entry.vendor || "unknown";
+      const path = entry.path || "/";
+      return when + " - " + category + " / " + vendor + " / " + path;
+    })
+    .join("\n");
+}
 function formatTopMap(map, emptyText) {
   const entries = Object.entries(map || {})
     .filter(([,v]) => Number(v || 0) > 0)
@@ -451,6 +469,7 @@ function buildPopupViewModel(domain, state) {
     totalEvents: safeObject(state.counts).total_events || 0,
     trackerDomains: safeObject(state.tracker_domains),
     endpointSummary: safeObject(state.endpoint_summary),
+    requestTimeline: Array.isArray(state.request_timeline) ? state.request_timeline : [],
     requestClassification: safeObject(state.request_classification),
     storageUsage: {
       cookie: safeObject(state.storage_summary).cookie_count || 0,
@@ -638,6 +657,10 @@ async function loadPopup() {
     ? liveEndpoints
     : (summary?.endpoints || {});
 
+  const liveTimeline = Array.isArray(profile.requestTimeline) ? profile.requestTimeline : [];
+  const timeline = liveTimeline.length > 0 ? liveTimeline : (summary?.timeline || []);
+
+  setText("requestTimeline", formatRequestTimeline(timeline));
   setText("topEndpoints", formatTopMap(endpoints, "No endpoints observed yet."));
   setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
   setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));

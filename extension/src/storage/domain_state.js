@@ -84,6 +84,7 @@ function createEmptyDomainState(domain, preserved = {}) {
 
     tracker_domains: {},
     endpoint_summary: {},
+    request_timeline: [],
     request_classification: {
       categories: {},
       vendors: {},
@@ -270,6 +271,19 @@ function applyEventToDomainState(state, event) {
       const endpointKey = category + " " + endpointPath.slice(0, 120);
       state.endpoint_summary = state.endpoint_summary || {};
       state.endpoint_summary[endpointKey] = (state.endpoint_summary[endpointKey] || 0) + 1;
+
+      state.request_timeline = state.request_timeline || [];
+      state.request_timeline.push({
+        ts: Date.now(),
+        category,
+        vendor,
+        path: endpointPath.slice(0, 160),
+        likelihood
+      });
+
+      if (state.request_timeline.length > 20) {
+        state.request_timeline = state.request_timeline.slice(-20);
+      }
     } catch {
       // ignore malformed URLs
     }
@@ -594,6 +608,7 @@ export async function closeDeepInspectRun(domain) {
     vendors: { ...(state.request_classification?.vendors || {}) },
     categories: { ...(state.request_classification?.categories || {}) },
     endpoints: { ...(state.endpoint_summary || {}) },
+    timeline: Array.isArray(state.request_timeline) ? state.request_timeline.slice(-20) : [],
     findings: Array.isArray(state.recent_findings) ? state.recent_findings.slice(-8) : []
   };
 
@@ -617,6 +632,7 @@ export async function closeDeepInspectRun(domain) {
   };
   state.signal_breakdown = {};
   state.endpoint_summary = {};
+  state.request_timeline = [];
   state.recent_findings = [];
 
   pushRunLog(state, "Deep Inspect stopped");
