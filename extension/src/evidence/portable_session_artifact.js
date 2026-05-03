@@ -74,3 +74,46 @@ export async function buildPortableSessionArtifact({ domain, state, popupView, r
   artifact.integrity.artifact_sha256 = await sha256Hex(canonicalWithoutHash);
   return artifact;
 }
+export async function buildLastDeepInspectArtifact({ domain, state, popupView, runtime }) {
+  const summary = state?.last_deep_inspect_summary || {};
+  const now = Date.now();
+
+  const artifact = {
+    artifact_type: "shadowprofile.last_deep_inspect_artifact.v1",
+    generated_at: now,
+    domain,
+    runtime: safeObject(runtime),
+    summary: {
+      scores: cloneJson(popupView?.scores || {}),
+      inferred_profile: cloneJson(popupView?.inferredProfile || {}),
+      evidence: cloneJson(popupView?.evidence || {}),
+      last_deep_inspect_summary: cloneJson(summary)
+    },
+    observations: {
+      signal_breakdown: cloneJson(summary.signalBreakdown || {}),
+      vendors: cloneJson(summary.vendors || {}),
+      categories: cloneJson(summary.categories || {}),
+      endpoints: cloneJson(summary.endpoints || {}),
+      tracker_domains: cloneJson(state?.tracker_domains || {}),
+      timeline: cloneJson(Array.isArray(summary.timeline) ? summary.timeline : []),
+      findings: cloneJson(Array.isArray(summary.findings) ? summary.findings : []),
+      run_log: []
+    },
+    integrity: {
+      format: "canonical-json-sha256",
+      hash_algorithm: "SHA-256",
+      artifact_sha256: null
+    }
+  };
+
+  const canonicalWithoutHash = canonicalJson({
+    ...artifact,
+    integrity: {
+      ...artifact.integrity,
+      artifact_sha256: null
+    }
+  });
+
+  artifact.integrity.artifact_sha256 = await sha256Hex(canonicalWithoutHash);
+  return artifact;
+}

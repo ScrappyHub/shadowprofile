@@ -1,4 +1,4 @@
-import { buildPortableSessionArtifact, canonicalJson } from "../../evidence/portable_session_artifact.js";
+import { buildPortableSessionArtifact, buildLastDeepInspectArtifact, canonicalJson } from "../../evidence/portable_session_artifact.js";
 
 function downloadTextFile(filename, text) {
   const blob = new Blob([text], { type: "application/json" });
@@ -573,9 +573,10 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
 
 function setupExportControl(domain, state, profile, runtimeMode, deepInspectDomain) {
   const btn = document.getElementById("exportSessionArtifact");
-  if (!btn) return;
+  const lastBtn = document.getElementById("exportLastDeepInspectArtifact");
+  if (!btn && !lastBtn) return;
 
-  btn.onclick = async () => {
+  if (btn) btn.onclick = async () => {
     try {
       const artifact = await buildPortableSessionArtifact({
         domain,
