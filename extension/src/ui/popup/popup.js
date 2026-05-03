@@ -1,3 +1,22 @@
+import { buildPortableSessionArtifact, canonicalJson } from "../../evidence/portable_session_artifact.js";
+
+function downloadTextFile(filename, text) {
+  const blob = new Blob([text], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function safeFilenamePart(value) {
+  return String(value || "unknown")
+    .replace(/[^a-z0-9._-]+/gi, "_")
+    .slice(0, 80);
+}
 function setText(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -551,6 +570,35 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
   };
 }
 
+
+function setupExportControl(domain, state, profile, runtimeMode, deepInspectDomain) {
+  const btn = document.getElementById("exportSessionArtifact");
+  if (!btn) return;
+
+  btn.onclick = async () => {
+    try {
+      const artifact = await buildPortableSessionArtifact({
+        domain,
+        state,
+        popupView: profile,
+        runtime: {
+          mode: runtimeMode || "UNKNOWN",
+          deepInspectDomain: deepInspectDomain || null,
+          extensionVersion: chrome.runtime.getManifest()?.version || "unknown"
+        }
+      });
+
+      const canonical = canonicalJson(artifact) + "\n";
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = "shadowprofile_session_" + safeFilenamePart(domain) + "_" + stamp + ".json";
+      downloadTextFile(filename, canonical);
+      setText("status", "Session artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
+    } catch (err) {
+      console.error("SESSION_ARTIFACT_EXPORT_FAIL", err);
+      setText("status", "Session artifact export failed");
+    }
+  };
+}
 async function loadPopup() {
   const tab = await getCurrentTab();
   const domain = getDomainFromUrl(tab?.url || "about:blank");
@@ -576,6 +624,7 @@ async function loadPopup() {
   }
 
   const profile = buildPopupViewModel(domain, state);
+  setupExportControl(domain, state, profile, runtimeMode, deepInspectDomain);
 
   const isPassiveDisplayMode = runtimeMode !== "DEEP_INSPECT";
   if (isPassiveDisplayMode) {
