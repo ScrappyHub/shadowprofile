@@ -541,12 +541,12 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
 
   updateButton();
 
-  resetBtn.onclick = async () => {
+  resetif (btn) btn.onclick = async () => {
     await sendMessage("CONTROL_RESET_DOMAIN", { domain: currentDomain });
     window.location.reload();
   };
 
-  toggleBtn.onclick = async () => {
+  toggleif (btn) btn.onclick = async () => {
     const active = mode === "DEEP_INSPECT" && inspectDomain === currentDomain;
     mode = active ? "PASSIVE_DEFAULT" : "DEEP_INSPECT";
 
@@ -573,10 +573,11 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
 
 function setupExportControl(domain, state, profile, runtimeMode, deepInspectDomain) {
   const btn = document.getElementById("exportSessionArtifact");
+const lastBtn = document.getElementById("exportLastDeepInspectArtifact");
   const lastBtn = document.getElementById("exportLastDeepInspectArtifact");
   if (!btn && !lastBtn) return;
 
-  if (btn) btn.onclick = async () => {
+  if (btn) if (btn) btn.onclick = async () => {
     try {
       const artifact = await buildPortableSessionArtifact({
         domain,
@@ -732,3 +733,28 @@ loadPopup().catch((err) => {
   console.error("POPUP_LOAD_FAIL", err);
   setText("status", "Popup failed to load");
 });
+if (lastBtn) lastBtn.onclick = async () => {
+  try {
+    const artifact = await buildLastDeepInspectArtifact({
+      domain,
+      state,
+      popupView: profile,
+      runtime: {
+        mode: runtimeMode || "UNKNOWN",
+        deepInspectDomain: deepInspectDomain || null,
+        extensionVersion: chrome.runtime.getManifest()?.version || "unknown"
+      }
+    });
+
+    const canonical = canonicalJson(artifact) + "\n";
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = "shadowprofile_last_deep_inspect_" + safeFilenamePart(domain) + "_" + stamp + ".json";
+
+    downloadTextFile(filename, canonical);
+
+    setText("status", "Last deep inspect artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
+  } catch (err) {
+    console.error("LAST_DEEP_INSPECT_ARTIFACT_EXPORT_FAIL", err);
+    setText("status", "Last deep inspect artifact export failed");
+  }
+};
