@@ -573,33 +573,59 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
 
 function setupExportControl(domain, state, profile, runtimeMode, deepInspectDomain) {
   const btn = document.getElementById("exportSessionArtifact");
-const lastBtn = document.getElementById("exportLastDeepInspectArtifact");
   const lastBtn = document.getElementById("exportLastDeepInspectArtifact");
-  if (!btn && !lastBtn) return;
 
-  if (btn) if (btn) btn.onclick = async () => {
-    try {
-      const artifact = await buildPortableSessionArtifact({
-        domain,
-        state,
-        popupView: profile,
-        runtime: {
-          mode: runtimeMode || "UNKNOWN",
-          deepInspectDomain: deepInspectDomain || null,
-          extensionVersion: chrome.runtime.getManifest()?.version || "unknown"
-        }
-      });
+  if (btn) {
+    btn.onclick = async () => {
+      try {
+        const artifact = await buildPortableSessionArtifact({
+          domain,
+          state,
+          popupView: profile,
+          runtime: {
+            mode: runtimeMode || "UNKNOWN",
+            deepInspectDomain: deepInspectDomain || null,
+            extensionVersion: chrome.runtime.getManifest()?.version || "unknown"
+          }
+        });
 
-      const canonical = canonicalJson(artifact) + "\n";
-      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const filename = "shadowprofile_session_" + safeFilenamePart(domain) + "_" + stamp + ".json";
-      downloadTextFile(filename, canonical);
-      setText("status", "Session artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
-    } catch (err) {
-      console.error("SESSION_ARTIFACT_EXPORT_FAIL", err);
-      setText("status", "Session artifact export failed");
-    }
-  };
+        const canonical = canonicalJson(artifact) + "\n";
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const filename = "shadowprofile_session_" + safeFilenamePart(domain) + "_" + stamp + ".json";
+        downloadTextFile(filename, canonical);
+        setText("status", "Session artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
+      } catch (err) {
+        console.error("SESSION_ARTIFACT_EXPORT_FAIL", err);
+        setText("status", "Session artifact export failed");
+      }
+    };
+  }
+
+  if (lastBtn) {
+    lastBtn.onclick = async () => {
+      try {
+        const artifact = await buildLastDeepInspectArtifact({
+          domain,
+          state,
+          popupView: profile,
+          runtime: {
+            mode: runtimeMode || "UNKNOWN",
+            deepInspectDomain: deepInspectDomain || null,
+            extensionVersion: chrome.runtime.getManifest()?.version || "unknown"
+          }
+        });
+
+        const canonical = canonicalJson(artifact) + "\n";
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const filename = "shadowprofile_last_deep_inspect_" + safeFilenamePart(domain) + "_" + stamp + ".json";
+        downloadTextFile(filename, canonical);
+        setText("status", "Last deep inspect artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
+      } catch (err) {
+        console.error("LAST_DEEP_INSPECT_ARTIFACT_EXPORT_FAIL", err);
+        setText("status", "Last deep inspect artifact export failed");
+      }
+    };
+  }
 }
 async function loadPopup() {
   const tab = await getCurrentTab();
@@ -733,28 +759,3 @@ loadPopup().catch((err) => {
   console.error("POPUP_LOAD_FAIL", err);
   setText("status", "Popup failed to load");
 });
-if (lastBtn) lastBtn.onclick = async () => {
-  try {
-    const artifact = await buildLastDeepInspectArtifact({
-      domain,
-      state,
-      popupView: profile,
-      runtime: {
-        mode: runtimeMode || "UNKNOWN",
-        deepInspectDomain: deepInspectDomain || null,
-        extensionVersion: chrome.runtime.getManifest()?.version || "unknown"
-      }
-    });
-
-    const canonical = canonicalJson(artifact) + "\n";
-    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const filename = "shadowprofile_last_deep_inspect_" + safeFilenamePart(domain) + "_" + stamp + ".json";
-
-    downloadTextFile(filename, canonical);
-
-    setText("status", "Last deep inspect artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
-  } catch (err) {
-    console.error("LAST_DEEP_INSPECT_ARTIFACT_EXPORT_FAIL", err);
-    setText("status", "Last deep inspect artifact export failed");
-  }
-};
