@@ -535,42 +535,45 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
   let inspectDomain = deepInspectDomain || null;
 
   function updateButton() {
+    if (!toggleBtn) return;
     const active = mode === "DEEP_INSPECT" && inspectDomain === currentDomain;
     toggleBtn.textContent = active ? "Stop Deep Inspect" : "Start Deep Inspect";
   }
 
   updateButton();
 
-  resetif (btn) btn.onclick = async () => {
-    await sendMessage("CONTROL_RESET_DOMAIN", { domain: currentDomain });
-    window.location.reload();
-  };
+  if (resetBtn) {
+    resetBtn.onclick = async () => {
+      await sendMessage("CONTROL_RESET_DOMAIN", { domain: currentDomain });
+      window.location.reload();
+    };
+  }
 
-  toggleif (btn) btn.onclick = async () => {
-    const active = mode === "DEEP_INSPECT" && inspectDomain === currentDomain;
-    mode = active ? "PASSIVE_DEFAULT" : "DEEP_INSPECT";
+  if (toggleBtn) {
+    toggleBtn.onclick = async () => {
+      const active = mode === "DEEP_INSPECT" && inspectDomain === currentDomain;
+      mode = active ? "PASSIVE_DEFAULT" : "DEEP_INSPECT";
 
-    const response = await sendMessage("CONTROL_SET_MODE", {
-      mode,
-      domain: currentDomain
-    });
+      const response = await sendMessage("CONTROL_SET_MODE", {
+        mode,
+        domain: currentDomain
+      });
 
-    if (response?.ok) {
-      mode = response.mode;
-      inspectDomain = response.deepInspectDomain || null;
+      if (response?.ok) {
+        mode = response.mode;
+        inspectDomain = response.deepInspectDomain || null;
 
-      let modeLabel = "Mode: " + mode;
-      if (mode === "DEEP_INSPECT" && inspectDomain) {
-        modeLabel += " (" + inspectDomain + ")";
+        let modeLabel = "Mode: " + mode;
+        if (mode === "DEEP_INSPECT" && inspectDomain) {
+          modeLabel += " (" + inspectDomain + ")";
+        }
+
+        setText("runtimeMode", modeLabel);
+        updateButton();
       }
-
-      setText("runtimeMode", modeLabel);
-      updateButton();
-    }
-  };
+    };
+  }
 }
-
-
 function setupExportControl(domain, state, profile, runtimeMode, deepInspectDomain) {
   const btn = document.getElementById("exportSessionArtifact");
   const lastBtn = document.getElementById("exportLastDeepInspectArtifact");
