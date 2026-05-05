@@ -1,4 +1,7 @@
 (function () {
+  if (!location || !/^https?:$/i.test(location.protocol)) {
+    return;
+  }
   function send(type, payload) {
     try {
       chrome.runtime.sendMessage({
