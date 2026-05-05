@@ -1,4 +1,6 @@
 export function canonicalJson(value) {
+  if (value === undefined) return "null";
+
   if (value === null || typeof value !== "object") {
     return JSON.stringify(value);
   }
@@ -16,24 +18,120 @@ export function canonicalJson(value) {
 async function sha256Hex(text) {
   const bytes = new TextEncoder().encode(text);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
+
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
 function safeObject(value) {
-  return value && typeof value === "object" ? value : {};
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function safeArray(value) {
+  return Array.isArray(value) ? value : [];
 }
 
 function cloneJson(value) {
   return JSON.parse(JSON.stringify(value ?? null));
 }
 
+function hasValues(map) {
+  return Object.values(safeObject(map)).some((v) => Number(v || 0) > 0);
+}
+
+function pickMap(...maps) {
+  for (const map of maps) {
+    if (hasValues(map)) return cloneJson(map);
+  }
+  return {};
+}
+
+function pickArray(...arrays) {
+  for (const array of arrays) {
+    if (Array.isArray(array) && array.length > 0) return cloneJson(array);
+  }
+  return [];
+}
+
+function buildObservations({ state, popupView, preferLastDeepInspect = false }) {
+  const summary = safeObject(state?.last_deep_inspect_summary);
+  const view = safeObject(popupView);
+  const liveRequestClassification = safeObject(view.requestClassification);
+
+  return {
+    signal_breakdown: pickMap(
+      preferLastDeepInspect ? summary.signalBreakdown : null,
+      view.signalBreakdown,
+      state?.signal_breakdown,
+      summary.signalBreakdown
+    ),
+
+    vendors: pickMap(
+      preferLastDeepInspect ? summary.vendors : null,
+      liveRequestClassification.vendors,
+      state?.request_classification?.vendors,
+      summary.vendors
+    ),
+
+    categories: pickMap(
+      preferLastDeepInspect ? summary.categories : null,
+      liveRequestClassification.categories,
+      state?.request_classification?.categories,
+      summary.categories,
+      summary.signalBreakdown
+    ),
+
+    endpoints: pickMap(
+      preferLastDeepInspect ? summary.endpoints : null,
+      view.endpointSummary,
+      state?.endpoint_summary,
+      summary.endpoints
+    ),
+
+    tracker_domains: pickMap(
+      view.trackerDomains,
+      state?.tracker_domains
+    ),
+
+    timeline: pickArray(
+      preferLastDeepInspect ? summary.timeline : null,
+      safeArray(view.requestTimeline).slice(-20),
+      safeArray(state?.request_timeline).slice(-20),
+      summary.timeline
+    ),
+
+    findings: pickArray(
+      preferLastDeepInspect ? summary.findings : null,
+      view.recentFindings,
+      state?.recent_findings,
+      summary.findings
+    ),
+
+    run_log: pickArray(
+      preferLastDeepInspect ? [] : view.runLog,
+      preferLastDeepInspect ? [] : state?.run_log
+    )
+  };
+}
+
+async function finalizeArtifact(artifact) {
+  const canonicalWithoutHash = canonicalJson({
+    ...artifact,
+    integrity: {
+      ...artifact.integrity,
+      artifact_sha256: null
+    }
+  });
+
+  artifact.integrity.artifact_sha256 = await sha256Hex(canonicalWithoutHash);
+  return artifact;
+}
+
 export async function buildPortableSessionArtifact({ domain, state, popupView, runtime }) {
-  const now = Date.now();
   const artifact = {
     artifact_type: "shadowprofile.session_artifact.v1",
-    generated_at: now,
+    generated_at: Date.now(),
     domain,
     runtime: safeObject(runtime),
     summary: {
@@ -42,20 +140,11 @@ export async function buildPortableSessionArtifact({ domain, state, popupView, r
       evidence: cloneJson(popupView?.evidence || {}),
       last_deep_inspect_summary: cloneJson(state?.last_deep_inspect_summary || {})
     },
-    observations: {
-      signal_breakdown: cloneJson(state?.signal_breakdown || state?.last_deep_inspect_summary?.signalBreakdown || {}),
-      vendors: cloneJson(state?.request_classification?.vendors || state?.last_deep_inspect_summary?.vendors || {}),
-      categories: cloneJson(state?.request_classification?.categories || state?.last_deep_inspect_summary?.categories || {}),
-      endpoints: cloneJson(state?.endpoint_summary || state?.last_deep_inspect_summary?.endpoints || {}),
-      tracker_domains: cloneJson(state?.tracker_domains || {}),
-      timeline: cloneJson(
-        Array.isArray(state?.request_timeline) && state.request_timeline.length > 0
-          ? state.request_timeline.slice(-20)
-          : (state?.last_deep_inspect_summary?.timeline || [])
-      ),
-      findings: cloneJson(state?.recent_findings || state?.last_deep_inspect_summary?.findings || []),
-      run_log: cloneJson(state?.run_log || [])
-    },
+    observations: buildObservations({
+      state,
+      popupView,
+      preferLastDeepInspect: false
+    }),
     integrity: {
       format: "canonical-json-sha256",
       hash_algorithm: "SHA-256",
@@ -63,24 +152,15 @@ export async function buildPortableSessionArtifact({ domain, state, popupView, r
     }
   };
 
-  const canonicalWithoutHash = canonicalJson({
-    ...artifact,
-    integrity: {
-      ...artifact.integrity,
-      artifact_sha256: null
-    }
-  });
-
-  artifact.integrity.artifact_sha256 = await sha256Hex(canonicalWithoutHash);
-  return artifact;
+  return await finalizeArtifact(artifact);
 }
+
 export async function buildLastDeepInspectArtifact({ domain, state, popupView, runtime }) {
-  const summary = state?.last_deep_inspect_summary || {};
-  const now = Date.now();
+  const summary = safeObject(state?.last_deep_inspect_summary);
 
   const artifact = {
     artifact_type: "shadowprofile.last_deep_inspect_artifact.v1",
-    generated_at: now,
+    generated_at: Date.now(),
     domain,
     runtime: safeObject(runtime),
     summary: {
@@ -89,16 +169,11 @@ export async function buildLastDeepInspectArtifact({ domain, state, popupView, r
       evidence: cloneJson(popupView?.evidence || {}),
       last_deep_inspect_summary: cloneJson(summary)
     },
-    observations: {
-      signal_breakdown: cloneJson(summary.signalBreakdown || {}),
-      vendors: cloneJson(summary.vendors || {}),
-      categories: cloneJson(summary.categories || {}),
-      endpoints: cloneJson(summary.endpoints || {}),
-      tracker_domains: cloneJson(state?.tracker_domains || {}),
-      timeline: cloneJson(Array.isArray(summary.timeline) ? summary.timeline : []),
-      findings: cloneJson(Array.isArray(summary.findings) ? summary.findings : []),
-      run_log: []
-    },
+    observations: buildObservations({
+      state,
+      popupView,
+      preferLastDeepInspect: true
+    }),
     integrity: {
       format: "canonical-json-sha256",
       hash_algorithm: "SHA-256",
@@ -106,14 +181,5 @@ export async function buildLastDeepInspectArtifact({ domain, state, popupView, r
     }
   };
 
-  const canonicalWithoutHash = canonicalJson({
-    ...artifact,
-    integrity: {
-      ...artifact.integrity,
-      artifact_sha256: null
-    }
-  });
-
-  artifact.integrity.artifact_sha256 = await sha256Hex(canonicalWithoutHash);
-  return artifact;
+  return await finalizeArtifact(artifact);
 }
