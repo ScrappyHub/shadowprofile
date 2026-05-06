@@ -581,10 +581,13 @@ function setupExportControl(domain, state, profile, runtimeMode, deepInspectDoma
   if (btn) {
     btn.onclick = async () => {
       try {
+        const latestState = await getDomainState(domain);
+        const latestProfile = buildPopupViewModel(domain, latestState);
+
         const artifact = await buildPortableSessionArtifact({
           domain,
-          state,
-          popupView: profile,
+          state: latestState,
+          popupView: latestProfile,
           runtime: {
             mode: runtimeMode || "UNKNOWN",
             deepInspectDomain: deepInspectDomain || null,
@@ -607,10 +610,13 @@ function setupExportControl(domain, state, profile, runtimeMode, deepInspectDoma
   if (lastBtn) {
     lastBtn.onclick = async () => {
       try {
+        const latestState = await getDomainState(domain);
+        const latestProfile = buildPopupViewModel(domain, latestState);
+
         const artifact = await buildLastDeepInspectArtifact({
           domain,
-          state,
-          popupView: profile,
+          state: latestState,
+          popupView: latestProfile,
           runtime: {
             mode: runtimeMode || "UNKNOWN",
             deepInspectDomain: deepInspectDomain || null,
