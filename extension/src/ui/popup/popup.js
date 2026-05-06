@@ -636,6 +636,13 @@ function setupExportControl(domain, state, profile, runtimeMode, deepInspectDoma
     };
   }
 }
+
+async function flushRequestCaptureBeforeRead() {
+  try {
+    await sendMessage("CONTROL_FLUSH_REQUESTS", {});
+  } catch {
+  }
+}
 async function loadPopup() {
   const tab = await getCurrentTab();
   const domain = getDomainFromUrl(tab?.url || "about:blank");

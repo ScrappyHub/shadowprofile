@@ -69,6 +69,12 @@ function registerMessageCapture() {
         return;
       }
 
+      if (message?.type === "CONTROL_FLUSH_REQUESTS") {
+        await flushRequestCaptureBuffer();
+        sendResponse({ ok: true, flushed: true });
+        return;
+      }
+
       if (message?.type === "CONTROL_RESET_DOMAIN") {
         const targetDomain = message?.payload?.domain || domain;
         await flushRequestCaptureBuffer();
