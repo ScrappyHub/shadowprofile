@@ -1,3 +1,5 @@
+const DOMAIN_STATE_KEY = "shadowprofile_domain_state";
+
 export function canonicalJson(value) {
   if (value === undefined) return "null";
 
@@ -54,9 +56,51 @@ function pickArray(...arrays) {
   return [];
 }
 
-function buildObservations({ state, popupView, preferLastDeepInspect = false }) {
-  const summary = safeObject(state?.last_deep_inspect_summary);
+async function readStoredDomainState(domain) {
+  try {
+    if (!globalThis.chrome?.storage?.local) return null;
+
+    const result = await chrome.storage.local.get([DOMAIN_STATE_KEY]);
+    const all = safeObject(result?.[DOMAIN_STATE_KEY]);
+    const state = all?.[domain];
+
+    if (state && typeof state === "object") {
+      return state;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function buildViewFallback(popupView) {
   const view = safeObject(popupView);
+  return {
+    signalBreakdown: safeObject(view.signalBreakdown),
+    requestClassification: safeObject(view.requestClassification),
+    endpointSummary: safeObject(view.endpointSummary),
+    trackerDomains: safeObject(view.trackerDomains),
+    requestTimeline: safeArray(view.requestTimeline),
+    recentFindings: safeArray(view.recentFindings),
+    runLog: safeArray(view.runLog),
+    scores: safeObject(view.scores),
+    inferredProfile: safeObject(view.inferredProfile),
+    evidence: safeObject(view.evidence)
+  };
+}
+
+async function resolveFreshInputs({ domain, state, popupView }) {
+  const storedState = await readStoredDomainState(domain);
+
+  return {
+    state: storedState || safeObject(state),
+    view: buildViewFallback(popupView)
+  };
+}
+
+function buildObservations({ state, view, preferLastDeepInspect = false }) {
+  const summary = safeObject(state?.last_deep_inspect_summary);
   const liveRequestClassification = safeObject(view.requestClassification);
 
   return {
@@ -129,20 +173,24 @@ async function finalizeArtifact(artifact) {
 }
 
 export async function buildPortableSessionArtifact({ domain, state, popupView, runtime }) {
+  const fresh = await resolveFreshInputs({ domain, state, popupView });
+  const latestState = fresh.state;
+  const view = fresh.view;
+
   const artifact = {
     artifact_type: "shadowprofile.session_artifact.v1",
     generated_at: Date.now(),
     domain,
     runtime: safeObject(runtime),
     summary: {
-      scores: cloneJson(popupView?.scores || {}),
-      inferred_profile: cloneJson(popupView?.inferredProfile || {}),
-      evidence: cloneJson(popupView?.evidence || {}),
-      last_deep_inspect_summary: cloneJson(state?.last_deep_inspect_summary || {})
+      scores: cloneJson(view.scores || {}),
+      inferred_profile: cloneJson(view.inferredProfile || {}),
+      evidence: cloneJson(view.evidence || {}),
+      last_deep_inspect_summary: cloneJson(latestState?.last_deep_inspect_summary || {})
     },
     observations: buildObservations({
-      state,
-      popupView,
+      state: latestState,
+      view,
       preferLastDeepInspect: false
     }),
     integrity: {
@@ -156,7 +204,10 @@ export async function buildPortableSessionArtifact({ domain, state, popupView, r
 }
 
 export async function buildLastDeepInspectArtifact({ domain, state, popupView, runtime }) {
-  const summary = safeObject(state?.last_deep_inspect_summary);
+  const fresh = await resolveFreshInputs({ domain, state, popupView });
+  const latestState = fresh.state;
+  const view = fresh.view;
+  const summary = safeObject(latestState?.last_deep_inspect_summary);
 
   const artifact = {
     artifact_type: "shadowprofile.last_deep_inspect_artifact.v1",
@@ -164,14 +215,14 @@ export async function buildLastDeepInspectArtifact({ domain, state, popupView, r
     domain,
     runtime: safeObject(runtime),
     summary: {
-      scores: cloneJson(popupView?.scores || {}),
-      inferred_profile: cloneJson(popupView?.inferredProfile || {}),
-      evidence: cloneJson(popupView?.evidence || {}),
+      scores: cloneJson(view.scores || {}),
+      inferred_profile: cloneJson(view.inferredProfile || {}),
+      evidence: cloneJson(view.evidence || {}),
       last_deep_inspect_summary: cloneJson(summary)
     },
     observations: buildObservations({
-      state,
-      popupView,
+      state: latestState,
+      view,
       preferLastDeepInspect: true
     }),
     integrity: {
