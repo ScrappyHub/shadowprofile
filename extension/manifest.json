@@ -21,7 +21,10 @@
                    "default_title":  "ShadowProfile",
                    "default_popup":  "src/ui/popup/popup.html",
                    "default_icon":  {
-                                        "128":  "assets/icon.svg"
+                                        "16":  "assets/icons/icon-16.png",
+                                        "128":  "assets/icons/icon-128.png",
+                                        "48":  "assets/icons/icon-48.png",
+                                        "32":  "assets/icons/icon-32.png"
                                     }
                },
     "options_page":  "src/ui/dashboard/dashboard.html",
@@ -37,6 +40,9 @@
                             }
                         ],
     "icons":  {
-                  "128":  "assets/icon.svg"
+                  "16":  "assets/icons/icon-16.png",
+                  "128":  "assets/icons/icon-128.png",
+                  "48":  "assets/icons/icon-48.png",
+                  "32":  "assets/icons/icon-32.png"
               }
 }
