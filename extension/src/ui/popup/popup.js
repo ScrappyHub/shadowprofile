@@ -21,7 +21,7 @@ function formatHistoryComparison(history) {
       const tracking = Number(scores.tracking_intensity || 0);
       const personalization = Number(scores.personalization_activity || 0);
       const shortHash = item.artifact_sha256 ? item.artifact_sha256.slice(0, 12) : "no-hash";
-      return item.domain + " â€” tracking " + tracking + ", personalization " + personalization + " Â· " + shortHash;
+      return item.domain + " Ã¢â‚¬â€ tracking " + tracking + ", personalization " + personalization + " Ã‚Â| " + shortHash;
     })
     .join("\n");
 }
