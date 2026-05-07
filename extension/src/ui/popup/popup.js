@@ -1,5 +1,56 @@
+import { buildExplanation, buildSegments, buildValueEstimate, buildConfidence } from "../../analysis/explanation_engine.js";
+import { appendSessionHistory, getSessionHistory } from "../../storage/session_history.js";
 import { buildPortableSessionArtifact, buildLastDeepInspectArtifact, canonicalJson } from "../../evidence/portable_session_artifact.js";
 
+
+function formatHistoryComparison(history) {
+  if (!Array.isArray(history) || history.length === 0) {
+    return "No session history yet.";
+  }
+
+  const latestByDomain = new Map();
+
+  for (const item of history) {
+    latestByDomain.set(item.domain, item);
+  }
+
+  return Array.from(latestByDomain.values())
+    .slice(-6)
+    .map((item) => {
+      const scores = item.scores || {};
+      const tracking = Number(scores.tracking_intensity || 0);
+      const personalization = Number(scores.personalization_activity || 0);
+      const shortHash = item.artifact_sha256 ? item.artifact_sha256.slice(0, 12) : "no-hash";
+      return item.domain + " — tracking " + tracking + ", personalization " + personalization + " · " + shortHash;
+    })
+    .join("\n");
+}
+
+async function renderSessionHistoryPanel() {
+  try {
+    const history = await getSessionHistory();
+    setText("sessionHistory", formatHistoryComparison(history));
+  } catch {
+    setText("sessionHistory", "Session history unavailable.");
+  }
+}
+
+async function recordArtifactHistory(domain, artifact) {
+  try {
+    await appendSessionHistory({
+      domain,
+      artifact_sha256: artifact?.integrity?.artifact_sha256 || "",
+      artifact_type: artifact?.artifact_type || "",
+      scores: artifact?.summary?.scores || {},
+      signals: artifact?.observations?.signal_breakdown || {},
+      vendors: artifact?.observations?.vendors || {},
+      categories: artifact?.observations?.categories || {}
+    });
+    await renderSessionHistoryPanel();
+  } catch (err) {
+    console.warn("SESSION_HISTORY_APPEND_FAIL", err);
+  }
+}
 function downloadTextFile(filename, text) {
   const blob = new Blob([text], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -599,6 +650,7 @@ function setupExportControl(domain, state, profile, runtimeMode, deepInspectDoma
         const stamp = new Date().toISOString().replace(/[:.]/g, "-");
         const filename = "shadowprofile_session_" + safeFilenamePart(domain) + "_" + stamp + ".json";
         downloadTextFile(filename, canonical);
+        await recordArtifactHistory(domain, artifact);
         setText("status", "Session artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
       } catch (err) {
         console.error("SESSION_ARTIFACT_EXPORT_FAIL", err);
@@ -628,6 +680,7 @@ function setupExportControl(domain, state, profile, runtimeMode, deepInspectDoma
         const stamp = new Date().toISOString().replace(/[:.]/g, "-");
         const filename = "shadowprofile_last_deep_inspect_" + safeFilenamePart(domain) + "_" + stamp + ".json";
         downloadTextFile(filename, canonical);
+        await recordArtifactHistory(domain, artifact);
         setText("status", "Last deep inspect artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
       } catch (err) {
         console.error("LAST_DEEP_INSPECT_ARTIFACT_EXPORT_FAIL", err);
