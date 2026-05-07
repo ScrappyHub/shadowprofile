@@ -4,6 +4,11 @@ function isShadowProfileBrowserPage(domain) {
 
   return (
     d === "startpageshared" ||
+    d === "history" ||
+    d === "downloads" ||
+    d === "bookmarks" ||
+    d === "settings" ||
+    d === "new-tab-page" ||
     d === "newtab" ||
     d === "extensions" ||
     d === "chrome" ||
@@ -87,7 +92,7 @@ function formatHistoryComparison(history) {
       const tracking = Number(scores.tracking_intensity || 0);
       const personalization = Number(scores.personalization_activity || 0);
       const shortHash = item.artifact_sha256 ? item.artifact_sha256.slice(0, 12) : "no-hash";
-      return item.domain + " ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â tracking " + tracking + ", personalization " + personalization + " Ãƒâ€šÃ‚| " + shortHash;
+      return item.domain + " ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â tracking " + tracking + ", personalization " + personalization + " ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€š| " + shortHash;
     })
     .join("\n");
 }
@@ -917,6 +922,7 @@ async function loadPopup() {
   setText("topTrackerDomains", "No active-site tracker domains in browser baseline mode.");
   setText("sessionHistory", "Open a website to build site-specific session history.");
 
+  setText("mode", "BROWSER_BASELINE");
   console.log("SHADOWPROFILE_BROWSER_PROFILE_MODE", { domain });
 
   setText("status", "Loaded");
