@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ShadowProfile Browser Baseline</title>
+  <link rel="stylesheet" href="./dashboard.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <img src="../../../assets/icons/icon-128.png" alt="ShadowProfile">
+      <div>
+        <h1>ShadowProfile</h1>
+        <p>Browser baseline profile — local only.</p>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Inferred Browser Profile</h2>
+        <div id="interests" class="big">Loading…</div>
+        <p id="confidence" class="muted"></p>
+        <p id="explanation" class="small"></p>
+      </article>
+
+      <article class="card">
+        <h2>Local Evidence</h2>
+        <div class="metrics">
+          <div><strong id="cookies">--</strong><span>Cookies</span></div>
+          <div><strong id="history">--</strong><span>History sample</span></div>
+          <div><strong id="cookieDomains">--</strong><span>Cookie domains</span></div>
+          <div><strong id="historyDomains">--</strong><span>History domains</span></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Top Categories</h2>
+        <pre id="categories">Loading…</pre>
+      </article>
+
+      <article class="card">
+        <h2>Top Cookie Domains</h2>
+        <pre id="cookieDomainList">Loading…</pre>
+      </article>
+
+      <article class="card">
+        <h2>Top History Domains</h2>
+        <pre id="historyDomainList">Loading…</pre>
+      </article>
+
+      <article class="card">
+        <h2>Trust Model</h2>
+        <ul>
+          <li>No remote servers</li>
+          <li>No analytics SDK</li>
+          <li>No cloud processing</li>
+          <li>User-controlled local export</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="actions">
+      <button id="refresh">Refresh Baseline</button>
+      <button id="export">Export Baseline JSON</button>
+      <span id="status">Ready</span>
+    </section>
+  </main>
+
+  <script type="module" src="./dashboard.js"></script>
+</body>
+</html>
