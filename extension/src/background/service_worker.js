@@ -4,18 +4,46 @@ import { registerRequestCapture, flushRequestCaptureBuffer } from "./capture_req
 import { applyEventToStoredDomainState, clearDomainState, appendDomainRunLog, closeDeepInspectRun } from "../storage/domain_state.js";
 
 const SHADOWPROFILE_RUNTIME_MODE = "PASSIVE_DEFAULT";
+const BASELINE_KEY = "shadowprofile_browser_baseline_v1";
 
-async function setRuntimeMode(mode = SHADOWPROFILE_RUNTIME_MODE, deepInspectDomain = null) {
-  const expiresAt = mode === "DEEP_INSPECT"
-    ? Date.now() + (1000 * 60 * 10)
-    : null;
+async function storageGet(keys) {
+  return await chrome.storage.local.get(keys);
+}
 
-  await chrome.storage.local.set({
-    shadowprofile_runtime_mode: mode,
-    shadowprofile_deep_inspect_domain: deepInspectDomain,
-    shadowprofile_deep_inspect_started_at: mode === "DEEP_INSPECT" ? Date.now() : null,
-    shadowprofile_deep_inspect_expires_at: expiresAt
+async function storageSet(obj) {
+  await chrome.storage.local.set(obj);
+}
+
+function callbackApi(fn) {
+  return new Promise((resolve) => {
+    try {
+      fn((result) => resolve(result || []));
+    } catch {
+      resolve([]);
+    }
   });
+}
+
+async function safeGetCookies() {
+  if (!chrome.cookies || !chrome.cookies.getAll) return [];
+  return await callbackApi((done) => chrome.cookies.getAll({}, done));
+}
+
+async function safeGetHistory() {
+  if (!chrome.history || !chrome.history.search) return [];
+  return await callbackApi((done) => chrome.history.search({
+    text: "",
+    maxResults: 250,
+    startTime: Date.now() - (1000 * 60 * 60 * 24 * 30)
+  }, done));
+}
+
+function hostFromUrl(url) {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return "unknown";
+  }
 }
 
 function getHostname(rawUrl) {
@@ -24,6 +52,118 @@ function getHostname(rawUrl) {
   } catch {
     return "unknown";
   }
+}
+
+function increment(map, key, by = 1) {
+  const safe = key || "unknown";
+  map[safe] = Number(map[safe] || 0) + by;
+}
+
+function inferCategoryFromHost(host) {
+  const h = String(host || "").toLowerCase();
+
+  if (h.includes("amazon") || h.includes("ebay") || h.includes("walmart") || h.includes("target") || h.includes("etsy")) return "shopping";
+  if (h.includes("youtube") || h.includes("netflix") || h.includes("hulu") || h.includes("twitch") || h.includes("spotify")) return "entertainment";
+  if (h.includes("github") || h.includes("gitlab") || h.includes("stackoverflow") || h.includes("npmjs") || h.includes("developer")) return "developer";
+  if (h.includes("google") || h.includes("bing") || h.includes("duckduckgo") || h.includes("search")) return "search";
+  if (h.includes("reddit") || h.includes("facebook") || h.includes("instagram") || h.includes("x.com") || h.includes("twitter") || h.includes("tiktok")) return "social";
+  if (h.includes("news") || h.includes("cnn") || h.includes("bbc") || h.includes("nytimes") || h.includes("washingtonpost")) return "news";
+  if (h.includes("bank") || h.includes("paypal") || h.includes("stripe") || h.includes("cashapp") || h.includes("venmo")) return "finance";
+
+  return "general";
+}
+
+function topMap(map, limit = 10) {
+  return Object.entries(map || {})
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, limit)
+    .reduce((acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+}
+
+function buildInterestList(categories) {
+  return Object.entries(categories || {})
+    .filter(([, value]) => Number(value || 0) > 0)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 6)
+    .map(([key]) => key);
+}
+
+async function collectBrowserBaselineProfile(reason = "scheduled") {
+  const now = Date.now();
+  const cookies = await safeGetCookies();
+  const historyItems = await safeGetHistory();
+  const allStorage = await storageGet(null);
+
+  const cookieDomains = {};
+  const historyDomains = {};
+  const categories = {};
+
+  for (const cookie of cookies) {
+    const domain = String(cookie.domain || "unknown").replace(/^\./, "").toLowerCase();
+    increment(cookieDomains, domain);
+    increment(categories, inferCategoryFromHost(domain));
+  }
+
+  for (const item of historyItems) {
+    const host = hostFromUrl(item.url || "");
+    increment(historyDomains, host, Number(item.visitCount || 1));
+    increment(categories, inferCategoryFromHost(host), Number(item.visitCount || 1));
+  }
+
+  const domainStateKeys = Object.keys(allStorage || {})
+    .filter((key) => key.startsWith("shadowprofile_domain_state:"));
+
+  const knownDomainStates = domainStateKeys.length;
+
+  const inferredInterests = buildInterestList(categories);
+
+  const baseline = {
+    artifact_type: "shadowprofile.browser_baseline.v1",
+    generated_at: now,
+    reason,
+    scope: "browser_local_profile",
+    privacy_model: {
+      local_only: true,
+      remote_servers: false,
+      analytics_sdk: false,
+      cloud_processing: false
+    },
+    counts: {
+      cookies: cookies.length,
+      history_items_sampled_30d: historyItems.length,
+      cookie_domains: Object.keys(cookieDomains).length,
+      history_domains: Object.keys(historyDomains).length,
+      known_shadowprofile_domain_states: knownDomainStates
+    },
+    inferred_profile: {
+      interests: inferredInterests,
+      confidence: inferredInterests.length >= 4 ? "high" : inferredInterests.length >= 2 ? "medium" : "low",
+      explanation: "Browser baseline inferred locally from visible cookies, recent history metadata, and ShadowProfile-observed domain state."
+    },
+    top_cookie_domains: topMap(cookieDomains, 10),
+    top_history_domains: topMap(historyDomains, 10),
+    top_categories: topMap(categories, 10)
+  };
+
+  await storageSet({ [BASELINE_KEY]: baseline });
+
+  return baseline;
+}
+
+async function setRuntimeMode(mode = SHADOWPROFILE_RUNTIME_MODE, deepInspectDomain = null) {
+  const expiresAt = mode === "DEEP_INSPECT"
+    ? Date.now() + (1000 * 60 * 10)
+    : null;
+
+  await storageSet({
+    shadowprofile_runtime_mode: mode,
+    shadowprofile_deep_inspect_domain: deepInspectDomain,
+    shadowprofile_deep_inspect_started_at: mode === "DEEP_INSPECT" ? Date.now() : null,
+    shadowprofile_deep_inspect_expires_at: expiresAt
+  });
 }
 
 function buildLightweightMessageEvent(tabUrl, domain, tabId, payload) {
@@ -75,6 +215,12 @@ function registerMessageCapture() {
         return;
       }
 
+      if (message?.type === "CONTROL_REFRESH_BROWSER_BASELINE") {
+        const baseline = await collectBrowserBaselineProfile("manual_refresh");
+        sendResponse({ ok: true, baseline });
+        return;
+      }
+
       if (message?.type === "CONTROL_RESET_DOMAIN") {
         const targetDomain = message?.payload?.domain || domain;
         await flushRequestCaptureBuffer();
@@ -94,10 +240,7 @@ function registerMessageCapture() {
           await appendDomainRunLog(targetDomain, "Deep Inspect started");
         } else {
           await flushRequestCaptureBuffer();
-
-          // Hard barrier before snapshotting Deep Inspect summary.
           await new Promise((resolve) => setTimeout(resolve, 100));
-
           await closeDeepInspectRun(targetDomain);
           await setRuntimeMode(mode, null);
         }
@@ -123,23 +266,31 @@ async function boot() {
   registerMessageCapture();
 
   await setRuntimeMode();
+  await collectBrowserBaselineProfile("boot");
 
   console.log("SHADOWPROFILE_BOOT_OK", {
     mode: SHADOWPROFILE_RUNTIME_MODE,
-    request_capture_enabled: true
+    request_capture_enabled: true,
+    browser_baseline_enabled: true
   });
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  setRuntimeMode().catch((err) => {
-    console.error("SET_RUNTIME_MODE_FAIL_ON_INSTALL", err);
-  });
+  Promise.resolve()
+    .then(() => setRuntimeMode())
+    .then(() => collectBrowserBaselineProfile("installed"))
+    .catch((err) => {
+      console.error("SET_RUNTIME_MODE_FAIL_ON_INSTALL", err);
+    });
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  setRuntimeMode().catch((err) => {
-    console.error("SET_RUNTIME_MODE_FAIL_ON_STARTUP", err);
-  });
+  Promise.resolve()
+    .then(() => setRuntimeMode())
+    .then(() => collectBrowserBaselineProfile("startup"))
+    .catch((err) => {
+      console.error("SET_RUNTIME_MODE_FAIL_ON_STARTUP", err);
+    });
 });
 
 boot().catch((err) => {
