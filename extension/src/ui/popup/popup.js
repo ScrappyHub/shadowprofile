@@ -1,3 +1,69 @@
+
+function isShadowProfileBrowserPage(domain) {
+  const d = String(domain || "").toLowerCase();
+
+  return (
+    d === "startpageshared" ||
+    d === "newtab" ||
+    d === "extensions" ||
+    d === "chrome" ||
+    d === "edge" ||
+    d === "opera" ||
+    d === "brave" ||
+    d === "about" ||
+    d === "unknown" ||
+    d.startsWith("chrome://") ||
+    d.startsWith("edge://") ||
+    d.startsWith("opera://") ||
+    d.startsWith("brave://") ||
+    d.startsWith("about:")
+  );
+}
+
+async function getBrowserBaselineProfile() {
+  try {
+    await chrome.runtime.sendMessage({
+      type: "CONTROL_REFRESH_BROWSER_BASELINE"
+    });
+  } catch {
+  }
+
+  const result = await chrome.storage.local.get("shadowprofile_browser_baseline_v1");
+  return result.shadowprofile_browser_baseline_v1 || null;
+}
+
+function formatBrowserProfileSummary(profile) {
+  if (!profile) return "No browser baseline profile yet.";
+
+  const inferred = profile.inferred_profile || {};
+  const interests = Array.isArray(inferred.interests) && inferred.interests.length > 0
+    ? inferred.interests.join(", ")
+    : "--";
+
+  const confidence = inferred.confidence || "low";
+  const counts = profile.counts || {};
+
+  return [
+    "Browser Profile",
+    "Interests: " + interests,
+    "Confidence: " + confidence,
+    "Cookies: " + String(counts.cookies || 0),
+    "Cookie Domains: " + String(counts.cookie_domains || 0),
+    "History Sample: " + String(counts.history_items_sampled_30d || 0),
+    "History Domains: " + String(counts.history_domains || 0)
+  ].join("\n");
+}
+
+function formatBrowserTopCategories(profile) {
+  const cats = profile?.top_categories || {};
+  const entries = Object.entries(cats)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 8);
+
+  if (entries.length === 0) return "No browser categories observed yet.";
+
+  return entries.map(([key, value]) => key + ": " + value).join(" ");
+}
 import { buildExplanation, buildSegments, buildValueEstimate, buildConfidence } from "../../analysis/explanation_engine.js";
 import { appendSessionHistory, getSessionHistory } from "../../storage/session_history.js";
 import { buildPortableSessionArtifact, buildLastDeepInspectArtifact, canonicalJson } from "../../evidence/portable_session_artifact.js";
@@ -21,7 +87,7 @@ function formatHistoryComparison(history) {
       const tracking = Number(scores.tracking_intensity || 0);
       const personalization = Number(scores.personalization_activity || 0);
       const shortHash = item.artifact_sha256 ? item.artifact_sha256.slice(0, 12) : "no-hash";
-      return item.domain + " Ã¢â‚¬â€ tracking " + tracking + ", personalization " + personalization + " Ã‚Â| " + shortHash;
+      return item.domain + " ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â tracking " + tracking + ", personalization " + personalization + " Ãƒâ€šÃ‚| " + shortHash;
     })
     .join("\n");
 }
@@ -821,7 +887,42 @@ async function loadPopup() {
   setText("cookieCount", storageUsage.cookie ?? 0);
   setText("storageCount", (storageUsage.local_storage ?? 0) + (storageUsage.session_storage ?? 0) + (storageUsage.indexeddb ?? 0));
 
+  if (isShadowProfileBrowserPage(domain)) {
+  const browserProfile = await getBrowserBaselineProfile();
+
+  setText("domain", "Browser Profile");
+  setText("mode", "BROWSER_BASELINE");
+  setText("interests", browserProfile?.inferred_profile?.interests?.join(", ") || "--");
+  setText("intent", "browser-level profile");
+  setText("segments", "--");
+  setText("value", "local only");
+  setText("confidence", browserProfile?.inferred_profile?.confidence || "low");
+
+  setText("trackingScore", "0");
+  setText("personalizationScore", String((browserProfile?.inferred_profile?.interests || []).length * 10));
+  setText("persistenceScore", String(browserProfile?.counts?.cookies ? 5 : 0));
+  setText("transparencyScore", "100");
+
+  setText("reasoning", browserProfile?.inferred_profile?.explanation || "Browser baseline inferred locally from browser-visible evidence.");
+  setText("profileWhy", formatBrowserProfileSummary(browserProfile));
+
+  setText("topCategories", formatBrowserTopCategories(browserProfile));
+  setText("topSignals", "Browser baseline mode");
+  setText("topVendors", "No site vendors in browser baseline mode.");
+  setText("topEndpoints", "No site endpoints in browser baseline mode.");
+  setText("requestTimeline", "No active-site request timeline in browser baseline mode.");
+  setText("recentFindings", "Browser baseline available from local cookies/history/domain state.");
+  setText("runLog", "Browser profile generated locally.");
+  setText("signalBreakdown", "Browser baseline mode.");
+  setText("topTrackerDomains", "No active-site tracker domains in browser baseline mode.");
+  setText("sessionHistory", "Open a website to build site-specific session history.");
+
+  console.log("SHADOWPROFILE_BROWSER_PROFILE_MODE", { domain });
+
   setText("status", "Loaded");
+  return;
+}
+setText("status", "Loaded");
 }
 
 loadPopup().catch((err) => {
