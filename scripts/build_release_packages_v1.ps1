@@ -55,23 +55,22 @@ function Apply-ManifestPatch(
   $p = Get-Content -LiteralPath $PatchPath -Raw | ConvertFrom-Json
 
   $patchProps = @($p.PSObject.Properties.Name)
+  $manifestProps = @($m.PSObject.Properties.Name)
 
   if($patchProps -contains "background"){
     $m.background = $p.background
   }
 
   if($patchProps -contains "browser_specific_settings"){
-    if(-not $m.browser_specific_settings){
+    if(-not ($manifestProps -contains "browser_specific_settings")){
       $m | Add-Member `
         -NotePropertyName browser_specific_settings `
         -NotePropertyValue $p.browser_specific_settings
-    }
-    else {
+    } else {
       $m.browser_specific_settings = $p.browser_specific_settings
     }
-  }
-  else {
-    if($m.PSObject.Properties.Name -contains "browser_specific_settings"){
+  } else {
+    if($manifestProps -contains "browser_specific_settings"){
       $m.PSObject.Properties.Remove("browser_specific_settings")
     }
   }
