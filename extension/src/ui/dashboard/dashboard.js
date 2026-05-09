@@ -89,7 +89,7 @@ async function boot() {
   renderBaseline(baseline);
 
   $("refresh").addEventListener("click", async () => {
-    $("status").textContent = "Refreshingâ€¦";
+    $("status").textContent = "RefreshingÃ¢â‚¬Â¦";
     const next = await refreshBaseline();
     renderBaseline(next);
   });
