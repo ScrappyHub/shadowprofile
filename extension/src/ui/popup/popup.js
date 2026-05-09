@@ -1,4 +1,45 @@
 
+function buildHumanProfileSummary(profile){
+
+  const interests = Array.isArray(profile?.interests)
+    ? profile.interests
+    : [];
+
+  const intent = Array.isArray(profile?.intent)
+    ? profile.intent
+    : [];
+
+  const parts = [];
+
+  if(interests.includes("shopping")){
+    parts.push("shopping-focused");
+  }
+
+  if(interests.includes("video_content")){
+    parts.push("high video consumption");
+  }
+
+  if(interests.includes("fitness")){
+    parts.push("fitness-oriented");
+  }
+
+  if(intent.includes("engaged_session")){
+    parts.push("high engagement behavior");
+  }
+
+  if(intent.includes("shopping")){
+    parts.push("recommendation-responsive");
+  }
+
+  if(parts.length === 0){
+    return "Your current browsing behavior shows very little active profiling.";
+  }
+
+  return "The internet currently sees you as: " + parts.join(", ") + ".";
+}
+
+
+
 function isShadowProfileBrowserPage(domain) {
   const d = String(domain || "").toLowerCase();
 
@@ -76,7 +117,7 @@ import { buildPortableSessionArtifact, buildLastDeepInspectArtifact, canonicalJs
 
 function formatHistoryComparison(history) {
   if (!Array.isArray(history) || history.length === 0) {
-    return "No session history yet.";
+    return "Your ShadowProfile will evolve as you browse.";
   }
 
   const latestByDomain = new Map();
@@ -92,7 +133,7 @@ function formatHistoryComparison(history) {
       const tracking = Number(scores.tracking_intensity || 0);
       const personalization = Number(scores.personalization_activity || 0);
       const shortHash = item.artifact_sha256 ? item.artifact_sha256.slice(0, 12) : "no-hash";
-      return item.domain + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â tracking " + tracking + ", personalization " + personalization + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡| " + shortHash;
+      return item.domain + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â tracking " + tracking + ", personalization " + personalization + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡| " + shortHash;
     })
     .join("\n");
 }
@@ -155,7 +196,7 @@ function formatList(value) {
 
 function formatFindings(findings) {
   if (!Array.isArray(findings) || findings.length === 0) {
-    return "No findings yet.";
+    return "No major profiling behavior detected yet.";
   }
 
   return findings
@@ -312,7 +353,7 @@ function formatTopTrackerDomains(domains) {
     .sort((a,b) => Number(b[1]) - Number(a[1]))
     .slice(0, 8);
 
-  if (!entries.length) return "No tracker domains observed yet.";
+  if (!entries.length) return "No major tracking infrastructure observed yet.";
 
   return entries
     .map(([domain, value]) => domain + ": " + value)
@@ -653,12 +694,12 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
   const resetBtn = document.getElementById("reset-domain");
   const toggleBtn = document.getElementById("toggle-mode");
 
-  let mode = runtimeMode || "PASSIVE_DEFAULT";
+  let mode = runtimeMode || "Eco Mode";
   let inspectDomain = deepInspectDomain || null;
 
   function updateButton() {
     if (!toggleBtn) return;
-    const active = mode === "DEEP_INSPECT" && inspectDomain === currentDomain;
+    const active = mode === "Deep Scan" && inspectDomain === currentDomain;
     toggleBtn.textContent = active ? "Stop Deep Inspect" : "Start Deep Inspect";
   }
 
@@ -673,8 +714,8 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
 
   if (toggleBtn) {
     toggleBtn.onclick = async () => {
-      const active = mode === "DEEP_INSPECT" && inspectDomain === currentDomain;
-      mode = active ? "PASSIVE_DEFAULT" : "DEEP_INSPECT";
+      const active = mode === "Deep Scan" && inspectDomain === currentDomain;
+      mode = active ? "Eco Mode" : "Deep Scan";
 
       const response = await sendMessage("CONTROL_SET_MODE", {
         mode,
@@ -686,7 +727,7 @@ async function setupControls(runtimeMode, deepInspectDomain, currentDomain) {
         inspectDomain = response.deepInspectDomain || null;
 
         let modeLabel = "Mode: " + mode;
-        if (mode === "DEEP_INSPECT" && inspectDomain) {
+        if (mode === "Deep Scan" && inspectDomain) {
           modeLabel += " (" + inspectDomain + ")";
         }
 
@@ -754,7 +795,7 @@ function setupExportControl(domain, state, profile, runtimeMode, deepInspectDoma
         await recordArtifactHistory(domain, artifact);
         setText("status", "Last deep inspect artifact exported: " + artifact.integrity.artifact_sha256.slice(0, 16));
       } catch (err) {
-        console.error("LAST_DEEP_INSPECT_ARTIFACT_EXPORT_FAIL", err);
+        console.error("LAST_Deep Scan_ARTIFACT_EXPORT_FAIL", err);
         setText("status", "Last deep inspect artifact export failed");
       }
     };
@@ -779,7 +820,7 @@ async function loadPopup() {
   const deepInspectDomain = result.deepInspectDomain;
 
   let modeLabel = "Mode: " + runtimeMode;
-  if (runtimeMode === "DEEP_INSPECT" && deepInspectDomain) {
+  if (runtimeMode === "Deep Scan" && deepInspectDomain) {
     modeLabel += " (" + deepInspectDomain + ")";
   }
 
@@ -794,7 +835,7 @@ async function loadPopup() {
   const profile = buildPopupViewModel(domain, state);
   setupExportControl(domain, state, profile, runtimeMode, deepInspectDomain);
 
-  const isPassiveDisplayMode = runtimeMode !== "DEEP_INSPECT";
+  const isPassiveDisplayMode = runtimeMode !== "Deep Scan";
   if (isPassiveDisplayMode) {
     profile.totalEvents = Math.min(profile.totalEvents || 0, 40);
     if (profile.evidence && profile.evidence.event_counts) {
@@ -812,7 +853,7 @@ async function loadPopup() {
   const trackerDomains = profile.trackerDomains || {};
   const storageUsage = profile.storageUsage || {};
   const integrity = profile.integrity || {};
-  const integrityReasoning = integrity.reasoning || {};
+  const integrityBehavior Interpretation = integrity.reasoning || {};
   const buildIdentity = integrity.build_identity || {};
   const evidence = profile.evidence || {};
   const eventCounts = evidence.event_counts || {};
@@ -836,9 +877,9 @@ async function loadPopup() {
       ? buildIdentity.name + " " + buildIdentity.version + " / mv" + buildIdentity.manifest_version
       : "--"
   );
-  setText("checksPassed", (integrityReasoning.checks_passed || []).length);
-  setText("checksFailed", (integrityReasoning.checks_failed || []).length);
-  setText("integritySummary", integrityReasoning.summary || "--");
+  setText("checksPassed", (integrityBehavior Interpretation.checks_passed || []).length);
+  setText("checksFailed", (integrityBehavior Interpretation.checks_failed || []).length);
+  setText("integritySummary", integrityBehavior Interpretation.summary || "--");
 
   setText("sessionStarted", formatTime(evidence.session_started_at));
   setText("sessionEnded", formatTime(evidence.session_ended_at));
@@ -878,7 +919,7 @@ async function loadPopup() {
   const timeline = liveTimeline.length > 0 ? liveTimeline : (summary?.timeline || []);
 
   setText("requestTimeline", formatRequestTimeline(timeline));
-  setText("topEndpoints", formatTopMap(endpoints, "No endpoints observed yet."));
+  setText("topEndpoints", formatTopMap(endpoints, "No strong behavioral signals detected yet."));
   setText("topTrackerDomains", formatTopTrackerDomains(profile.trackerDomains));
   setText("profileWhy", formatProfileWhy({ ...profile, signalBreakdown: signals }));
   renderSignalBreakdown(signals);
