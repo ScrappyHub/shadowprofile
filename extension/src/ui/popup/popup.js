@@ -1,42 +1,20 @@
 
-function buildHumanProfileSummary(profile){
+/* SHADOWPROFILE_RENDER_GUARD_V1 */
 
-  const interests = Array.isArray(profile?.interests)
-    ? profile.interests
-    : [];
-
-  const intent = Array.isArray(profile?.intent)
-    ? profile.intent
-    : [];
-
-  const parts = [];
-
-  if(interests.includes("shopping")){
-    parts.push("shopping-focused");
+function spSafe(v, fallback = "--"){
+  if(v === undefined || v === null || v === ""){
+    return fallback;
   }
-
-  if(interests.includes("video_content")){
-    parts.push("high video consumption");
-  }
-
-  if(interests.includes("fitness")){
-    parts.push("fitness-oriented");
-  }
-
-  if(intent.includes("engaged_session")){
-    parts.push("high engagement behavior");
-  }
-
-  if(intent.includes("shopping")){
-    parts.push("recommendation-responsive");
-  }
-
-  if(parts.length === 0){
-    return "Your current browsing behavior shows very little active profiling.";
-  }
-
-  return "The internet currently sees you as: " + parts.join(", ") + ".";
+  return v;
 }
+
+window.addEventListener("error", (e) => {
+  console.error("SHADOWPROFILE_UI_RUNTIME_ERROR", e.error || e.message);
+});
+
+
+
+
 
 
 
@@ -82,8 +60,8 @@ function formatBrowserProfileSummary(profile) {
   if (!profile) return "No browser baseline profile yet.";
 
   const inferred = profile.inferred_profile || {};
-  const interests = Array.isArray(inferred.interests) && inferred.interests.length > 0
-    ? inferred.interests.join(", ")
+  const interests = Array.isArray(inferred.interests) && inferred.interests?.length || 0 > 0
+    ? inferred.interests?.join(", ") || "--"
     : "--";
 
   const confidence = inferred.confidence || "low";
@@ -106,7 +84,7 @@ function formatBrowserTopCategories(profile) {
     .sort((a, b) => Number(b[1]) - Number(a[1]))
     .slice(0, 8);
 
-  if (entries.length === 0) return "No browser categories observed yet.";
+  if (entries?.length || 0 === 0) return "No browser categories observed yet.";
 
   return entries.map(([key, value]) => key + ": " + value).join(" ");
 }
@@ -116,7 +94,7 @@ import { buildPortableSessionArtifact, buildLastDeepInspectArtifact, canonicalJs
 
 
 function formatHistoryComparison(history) {
-  if (!Array.isArray(history) || history.length === 0) {
+  if (!Array.isArray(history) || history?.length || 0 === 0) {
     return "Your ShadowProfile will evolve as you browse.";
   }
 
@@ -133,7 +111,7 @@ function formatHistoryComparison(history) {
       const tracking = Number(scores.tracking_intensity || 0);
       const personalization = Number(scores.personalization_activity || 0);
       const shortHash = item.artifact_sha256 ? item.artifact_sha256.slice(0, 12) : "no-hash";
-      return item.domain + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â tracking " + tracking + ", personalization " + personalization + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡| " + shortHash;
+      return item.domain + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â tracking " + tracking + ", personalization " + personalization + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡| " + shortHash;
     })
     .join("\n");
 }
@@ -187,15 +165,15 @@ function setText(id, value) {
 }
 
 function formatList(value) {
-  if (!Array.isArray(value) || value.length === 0) {
+  if (!Array.isArray(value) || value?.length || 0 === 0) {
     return "--";
   }
-  return value.join(", ");
+  return value?.join(", ") || "--";
 }
 
 
 function formatFindings(findings) {
-  if (!Array.isArray(findings) || findings.length === 0) {
+  if (!Array.isArray(findings) || findings?.length || 0 === 0) {
     return "No major profiling behavior detected yet.";
   }
 
@@ -211,13 +189,13 @@ function formatFindings(findings) {
 }
 
 function formatRunLog(entries) {
-  if (!Array.isArray(entries) || entries.length === 0) {
+  if (!Array.isArray(entries) || entries?.length || 0 === 0) {
     return "No run log yet.";
   }
 
   const compact = [];
   for (const entry of entries.slice(-20)) {
-    const prev = compact[compact.length - 1];
+    const prev = compact[compact?.length || 0 - 1];
     if (prev && prev.message === entry.message) {
       prev.count = (prev.count || 1) + 1;
       prev.ts = entry.ts;
@@ -250,7 +228,7 @@ function renderSignalBreakdown(breakdown) {
     .filter(([, value]) => Number(value || 0) > 0)
     .sort((a, b) => Number(b[1]) - Number(a[1]));
 
-  if (entries.length === 0) {
+  if (entries?.length || 0 === 0) {
     el.textContent = "No signal breakdown yet.";
     return;
   }
@@ -287,14 +265,14 @@ function formatLastDeepSummary(summary) {
   return [
     "Total events: " + total,
     "Request events: " + requests,
-    parts.length ? "Top signals: " + parts.slice(0,4).join(", ") : "Top signals: none"
+    parts?.length || 0 ? "Top signals: " + parts.slice(0,4)?.join(", ") || "--" : "Top signals: none"
   ].join("\n");
 }
 
 
 
 function formatRequestTimeline(entries) {
-  if (!Array.isArray(entries) || entries.length === 0) {
+  if (!Array.isArray(entries) || entries?.length || 0 === 0) {
     return "No request timeline yet.";
   }
 
@@ -316,7 +294,7 @@ function formatTopMap(map, emptyText) {
     .sort((a,b) => Number(b[1]) - Number(a[1]))
     .slice(0, 8);
 
-  if (!entries.length) return emptyText;
+  if (!entries?.length || 0) return emptyText;
 
   return entries.map(([k,v]) => k + ": " + v).join("\n");
 }
@@ -340,7 +318,7 @@ function formatTopSignals(breakdown) {
     .sort((a,b) => Number(b[1]) - Number(a[1]))
     .slice(0, 6);
 
-  if (!entries.length) return "No top signals yet.";
+  if (!entries?.length || 0) return "No top signals yet.";
 
   return entries
     .map(([key, value]) => key.replaceAll("_", " ") + ": " + value)
@@ -353,7 +331,7 @@ function formatTopTrackerDomains(domains) {
     .sort((a,b) => Number(b[1]) - Number(a[1]))
     .slice(0, 8);
 
-  if (!entries.length) return "No major tracking infrastructure observed yet.";
+  if (!entries?.length || 0) return "No major tracking infrastructure observed yet.";
 
   return entries
     .map(([domain, value]) => domain + ": " + value)
@@ -376,7 +354,7 @@ function formatProfileWhy(profile) {
   if (signals.includes("checkout")) reasons.push("Checkout-related activity was observed.");
   if (signals.includes("beacon")) reasons.push("Beacon-style requests were observed.");
 
-  return reasons.length ? reasons.join("\n") : "No explanation yet.";
+  return reasons?.length || 0 ? reasons.join("\n") : "No explanation yet.";
 }
 function formatTime(value) {
   if (typeof value !== "number") {
@@ -423,7 +401,7 @@ function buildIntegrityRecord() {
 
   const checks = [
     { name: "manifest_version_expected", passed: manifest?.manifest_version === 3 },
-    { name: "required_permissions_present", passed: missing.length === 0 },
+    { name: "required_permissions_present", passed: missing?.length || 0 === 0 },
     { name: "popup_path_expected", passed: manifest?.action?.default_popup === "src/ui/popup/popup.html" },
     { name: "service_worker_path_expected", passed: manifest?.background?.service_worker === "src/background/service_worker.js" },
     { name: "core_file_list_loaded", passed: true }
@@ -436,11 +414,11 @@ function buildIntegrityRecord() {
     generated_at: Date.now(),
     engine_version: "integrity_engine_v1",
     build_identity: buildIdentityFromManifest(manifest),
-    integrity_status: checksFailed.length === 0 ? "verified" : "modified",
+    integrity_status: checksFailed?.length || 0 === 0 ? "verified" : "modified",
     reasoning: {
       checks_passed: checksPassed,
       checks_failed: checksFailed,
-      summary: checksFailed.length === 0
+      summary: checksFailed?.length || 0 === 0
         ? "All defined integrity checks passed."
         : "Some integrity checks failed."
     }
@@ -451,7 +429,7 @@ function buildScores(state) {
   const counts = safeObject(state.counts);
   const markers = safeObject(state.markers);
   const storage = safeObject(state.storage_summary);
-  const trackerCount = Object.keys(safeObject(state.tracker_domains)).length;
+  const trackerCount = Object.keys(safeObject(state.tracker_domains))?.length || 0;
   const requestClassification = safeObject(state.request_classification);
   const trackerLikelihood = safeObject(requestClassification.tracker_likelihood);
 
@@ -529,7 +507,7 @@ function buildInferredProfile(domain, state) {
   const counts = safeObject(state.counts);
   const markers = safeObject(state.markers);
   const storage = safeObject(state.storage_summary);
-  const trackerCount = Object.keys(safeObject(state.tracker_domains)).length;
+  const trackerCount = Object.keys(safeObject(state.tracker_domains))?.length || 0;
   const requestClassification = safeObject(state.request_classification);
   const trackerLikelihood = safeObject(requestClassification.tracker_likelihood);
 
@@ -571,9 +549,9 @@ function buildInferredProfile(domain, state) {
   if (requestEvents >= 45 || trackerCount >= 5 || userActions >= 12) valueEstimate = "mid";
 
   let confidenceScore = 0;
-  if (interests.length > 0) confidenceScore += 1;
-  if (intent.length > 0) confidenceScore += 1;
-  if (segments.length > 0) confidenceScore += 1;
+  if (interests?.length || 0 > 0) confidenceScore += 1;
+  if (intent?.length || 0 > 0) confidenceScore += 1;
+  if (segments?.length || 0 > 0) confidenceScore += 1;
   if (requestEvents >= 25) confidenceScore += 1;
   if (userActions >= 6) confidenceScore += 1;
 
@@ -589,8 +567,8 @@ function buildInferredProfile(domain, state) {
   else if ((storage.cookie_count || 0) > 0) explanationParts.push("cookie activity");
 
   let explanation = "Profile inferred from observed site activity.";
-  if (explanationParts.length > 0) {
-    explanation = "Profile inferred from " + explanationParts.join(", ") + ".";
+  if (explanationParts?.length || 0 > 0) {
+    explanation = "Profile inferred from " + explanationParts?.join(", ") || "--" + ".";
   }
 
   return {
@@ -630,7 +608,7 @@ function buildEvidence(domain, state, integrity) {
       user_action_events: counts.user_action_events || 0
     },
     tracker_summary: {
-      tracker_domain_count: Object.keys(trackerDomains).length
+      tracker_domain_count: Object.keys(trackerDomains)?.length || 0
     }
   };
 }
@@ -668,7 +646,7 @@ function buildPopupViewModel(domain, state) {
 
 async function getCurrentTab() {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  return tabs && tabs.length > 0 ? tabs[0] : null;
+  return tabs && tabs?.length || 0 > 0 ? tabs[0] : null;
 }
 
 async function getDomainState(domain) {
@@ -877,8 +855,8 @@ async function loadPopup() {
       ? buildIdentity.name + " " + buildIdentity.version + " / mv" + buildIdentity.manifest_version
       : "--"
   );
-  setText("checksPassed", (integrityBehavior Interpretation.checks_passed || []).length);
-  setText("checksFailed", (integrityBehavior Interpretation.checks_failed || []).length);
+  setText("checksPassed", (integrityBehavior Interpretation.checks_passed || [])?.length || 0);
+  setText("checksFailed", (integrityBehavior Interpretation.checks_failed || [])?.length || 0);
   setText("integritySummary", integrityBehavior Interpretation.summary || "--");
 
   setText("sessionStarted", formatTime(evidence.session_started_at));
@@ -916,7 +894,7 @@ async function loadPopup() {
     : (summary?.endpoints || {});
 
   const liveTimeline = Array.isArray(profile.requestTimeline) ? profile.requestTimeline : [];
-  const timeline = liveTimeline.length > 0 ? liveTimeline : (summary?.timeline || []);
+  const timeline = liveTimeline?.length || 0 > 0 ? liveTimeline : (summary?.timeline || []);
 
   setText("requestTimeline", formatRequestTimeline(timeline));
   setText("topEndpoints", formatTopMap(endpoints, "No strong behavioral signals detected yet."));
@@ -929,7 +907,7 @@ async function loadPopup() {
 
   setText("totalVisits", profile.totalVisits ?? 0);
   setText("totalEvents", profile.totalEvents ?? 0);
-  setText("trackerCount", Object.keys(trackerDomains).length);
+  setText("trackerCount", Object.keys(trackerDomains)?.length || 0);
   setText("cookieCount", storageUsage.cookie ?? 0);
   setText("storageCount", (storageUsage.local_storage ?? 0) + (storageUsage.session_storage ?? 0) + (storageUsage.indexeddb ?? 0));
 
@@ -938,14 +916,14 @@ async function loadPopup() {
 
   setText("domain", "Browser Profile");
   setText("mode", "BROWSER_BASELINE");
-  setText("interests", browserProfile?.inferred_profile?.interests?.join(", ") || "--");
+  setText("interests", browserProfile?.inferred_profile?.interests??.join(", ") || "--" || "--");
   setText("intent", "browser-level profile");
   setText("segments", "--");
   setText("value", "local only");
   setText("confidence", browserProfile?.inferred_profile?.confidence || "low");
 
   setText("trackingScore", "0");
-  setText("personalizationScore", String((browserProfile?.inferred_profile?.interests || []).length * 10));
+  setText("personalizationScore", String((browserProfile?.inferred_profile?.interests || [])?.length || 0 * 10));
   setText("persistenceScore", String(browserProfile?.counts?.cookies ? 5 : 0));
   setText("transparencyScore", "100");
 
