@@ -1,3 +1,6 @@
+import { buildExplanation, buildSegments, buildValueEstimate, buildConfidence } from "../../analysis/explanation_engine.js";
+import { appendSessionHistory, getSessionHistory } from "../../storage/session_history.js";
+import { buildPortableSessionArtifact, buildLastDeepInspectArtifact, canonicalJson } from "../../evidence/portable_session_artifact.js";
 
 function isShadowProfileBrowserPage(domain) {
   const d = String(domain || "").toLowerCase();
@@ -69,11 +72,6 @@ function formatBrowserTopCategories(profile) {
 
   return entries.map(([key, value]) => key + ": " + value).join(" ");
 }
-import { buildExplanation, buildSegments, buildValueEstimate, buildConfidence } from "../../analysis/explanation_engine.js";
-import { appendSessionHistory, getSessionHistory } from "../../storage/session_history.js";
-import { buildPortableSessionArtifact, buildLastDeepInspectArtifact, canonicalJson } from "../../evidence/portable_session_artifact.js";
-
-
 function formatHistoryComparison(history) {
   if (!Array.isArray(history) || history.length === 0) {
     return "No session history yet.";
@@ -92,7 +90,7 @@ function formatHistoryComparison(history) {
       const tracking = Number(scores.tracking_intensity || 0);
       const personalization = Number(scores.personalization_activity || 0);
       const shortHash = item.artifact_sha256 ? item.artifact_sha256.slice(0, 12) : "no-hash";
-      return item.domain + " ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â tracking " + tracking + ", personalization " + personalization + " ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡| " + shortHash;
+      return item.domain + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â tracking " + tracking + ", personalization " + personalization + " ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡| " + shortHash;
     })
     .join("\n");
 }
