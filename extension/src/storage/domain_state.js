@@ -374,6 +374,74 @@ function applyEventToDomainState(state, event) {
 
   if (type === "user_action") {
     state.counts.user_action_events += 1;
+
+    const p = safeObject(event?.payload);
+    const fallbackCategory = String(p.signal_category || p.category || "").toLowerCase();
+    const fallbackSource = String(p.signal_source || p.kind || "").toLowerCase();
+
+    if (fallbackCategory) {
+      state.request_classification = state.request_classification || {
+        categories: {},
+        vendors: {},
+        tracker_likelihood: { low: 0, medium: 0, high: 0 },
+        third_party_requests: 0,
+        cart_requests: 0,
+        checkout_requests: 0,
+        recommendation_requests: 0,
+        telemetry_requests: 0,
+        tracking_pixel_requests: 0,
+        beacon_requests: 0
+      };
+
+      state.signal_breakdown = state.signal_breakdown || {};
+      state.signal_breakdown[fallbackCategory] = (state.signal_breakdown[fallbackCategory] || 0) + 1;
+
+      state.request_classification.categories[fallbackCategory] =
+        (state.request_classification.categories[fallbackCategory] || 0) + 1;
+
+      const vendor = String(p.vendor || p.signal_vendor || event.domain || "unknown");
+      state.request_classification.vendors[vendor] =
+        (state.request_classification.vendors[vendor] || 0) + 1;
+
+      if (fallbackCategory === "recommendation") {
+        state.request_classification.recommendation_requests += 1;
+        state.markers.recommendation_activity_likely = true;
+        pushFinding(state, "recommendation", "Recommendation activity observed");
+        pushRunLog(state, "Recommendation activity observed");
+      }
+
+      if (fallbackCategory === "video_delivery") {
+        pushFinding(state, "video_delivery", "Video delivery activity observed");
+        pushRunLog(state, "Video delivery activity observed");
+      }
+
+      if (fallbackCategory === "telemetry") {
+        state.request_classification.telemetry_requests += 1;
+        pushFinding(state, "telemetry", "Behavior telemetry observed");
+        pushRunLog(state, "Behavior telemetry observed");
+      }
+
+      if (fallbackCategory === "beacon") {
+        state.request_classification.beacon_requests += 1;
+        pushFinding(state, "beacon", "Beacon request observed");
+        pushRunLog(state, "Beacon request observed");
+      }
+
+      if (fallbackCategory === "app_api") {
+        pushFinding(state, "app_api", "Application API activity observed");
+        pushRunLog(state, "Application API activity observed");
+      }
+
+      if (
+        fallbackCategory === "engaged_scroll" ||
+        fallbackCategory === "user_action" ||
+        fallbackSource === "click" ||
+        fallbackSource === "engaged_scroll"
+      ) {
+        pushFinding(state, "engagement", "Engaged browsing behavior observed");
+        pushRunLog(state, "Engaged browsing behavior observed");
+      }
+    }
   }
 
   if (url.includes("cart") || url.includes("basket") || url.includes("bag")) {
