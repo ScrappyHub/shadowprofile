@@ -108,3 +108,95 @@
 
   init();
 })();
+
+/* SHADOWPROFILE_CAPTURE_COVERAGE_SIMPLE_V1 */
+(() => {
+  const seen = new Set();
+
+  function category(url) {
+    const u = String(url || "").toLowerCase();
+    if (u.includes("youtubei/v1/player") || u.includes("youtubei/v1/next") || u.includes("youtubei/v1/browse")) return "recommendation";
+    if (u.includes("googlevideo") || u.includes("videoplayback")) return "video_delivery";
+    if (u.includes("analytics") || u.includes("/collect") || u.includes("/log")) return "telemetry";
+    if (u.includes("beacon") || u.includes("ptracking")) return "beacon";
+    if (u.includes("graphql") || u.includes("/api/")) return "app_api";
+    return "site_activity";
+  }
+
+  function sendSignal(kind, url, extra = {}) {
+    try {
+      const key = kind + "|" + String(url || "");
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      chrome.runtime.sendMessage({
+        type: "USER_ACTION",
+        payload: {
+          domain: location.hostname.toLowerCase(),
+          kind: "deep_scan_signal",
+          signal_source: kind,
+          signal_category: category(url),
+          signal_url: String(url || location.href).slice(0, 500),
+          path: location.pathname || "/",
+          ...extra
+        }
+      });
+    } catch {}
+  }
+
+  if (window.fetch && !window.__spFetchCoverageV1) {
+    window.__spFetchCoverageV1 = true;
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+      const url = typeof input === "string" ? input : ((input && input.url) || "");
+      sendSignal("fetch", url);
+      return originalFetch.apply(this, arguments);
+    };
+  }
+
+  if (window.XMLHttpRequest && !window.__spXhrCoverageV1) {
+    window.__spXhrCoverageV1 = true;
+    const open = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url) {
+      sendSignal("xhr", url, { method: String(method || "GET") });
+      return open.apply(this, arguments);
+    };
+  }
+
+  try {
+    const obs = new PerformanceObserver((list) => {
+      for (const r of list.getEntries()) {
+        sendSignal("performance", r.name || "", {
+          initiatorType: r.initiatorType || "resource"
+        });
+      }
+    });
+    obs.observe({ entryTypes: ["resource"] });
+  } catch {}
+
+  let lastHref = location.href;
+  setInterval(() => {
+    if (location.href !== lastHref) {
+      lastHref = location.href;
+      sendSignal("spa_navigation", location.href);
+    }
+  }, 1000);
+
+  let sentScroll = false;
+  window.addEventListener("scroll", () => {
+    if (!sentScroll && window.scrollY > 600) {
+      sentScroll = true;
+      sendSignal("engaged_scroll", location.href, { scrollY: window.scrollY });
+    }
+  }, { passive: true });
+
+  document.addEventListener("click", (e) => {
+    const target = e.target && e.target.closest ? e.target.closest("a,button,[role='button'],ytd-thumbnail,ytd-video-renderer") : null;
+    if (!target) return;
+    sendSignal("click", target.href || location.href, {
+      text: String(target.innerText || target.ariaLabel || target.title || "").slice(0, 120)
+    });
+  }, true);
+
+  console.log("SHADOWPROFILE_CAPTURE_COVERAGE_SIMPLE_V1");
+})();
