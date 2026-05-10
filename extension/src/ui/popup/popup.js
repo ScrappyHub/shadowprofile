@@ -411,6 +411,7 @@ function buildScores(state) {
   const trackerCount = Object.keys(safeObject(state.tracker_domains)).length;
   const requestClassification = safeObject(state.request_classification);
   const trackerLikelihood = safeObject(requestClassification.tracker_likelihood);
+  const commerceLike = isCommerceDomain(domain) || hasStrongCommerceSignals(requestClassification, markers);
 
   const requestEvents = counts.request_events || 0;
   const responseEvents = counts.response_events || 0;
@@ -482,6 +483,34 @@ function buildScores(state) {
   };
 }
 
+
+function isCommerceDomain(domain) {
+  const d = String(domain || "").toLowerCase();
+  return (
+    d.includes("amazon") ||
+    d.includes("ebay") ||
+    d.includes("walmart") ||
+    d.includes("target") ||
+    d.includes("etsy") ||
+    d.includes("shop") ||
+    d.includes("store") ||
+    d.includes("bestbuy") ||
+    d.includes("homedepot") ||
+    d.includes("lowes")
+  );
+}
+
+function hasStrongCommerceSignals(requestClassification, markers) {
+  const cart = Number(requestClassification?.cart_requests || 0);
+  const checkout = Number(requestClassification?.checkout_requests || 0);
+
+  return (
+    checkout > 0 ||
+    cart >= 2 ||
+    markers?.checkout_activity_likely === true
+  );
+}
+
 function buildInferredProfile(domain, state) {
   const counts = safeObject(state.counts);
   const markers = safeObject(state.markers);
@@ -489,6 +518,7 @@ function buildInferredProfile(domain, state) {
   const trackerCount = Object.keys(safeObject(state.tracker_domains)).length;
   const requestClassification = safeObject(state.request_classification);
   const trackerLikelihood = safeObject(requestClassification.tracker_likelihood);
+  const commerceLike = isCommerceDomain(domain) || hasStrongCommerceSignals(requestClassification, markers);
 
   const requestEvents = counts.request_events || 0;
   const userActions = counts.user_action_events || 0;
@@ -501,10 +531,10 @@ function buildInferredProfile(domain, state) {
   if (domain.includes("youtube")) interests.push("video_content");
   if (domain.includes("cnn") || domain.includes("news")) interests.push("news");
 
-  if (markers.cart_activity_likely || (requestClassification.cart_requests || 0) > 0) intent.push("shopping");
-  if ((requestClassification.checkout_requests || 0) > 0 && !intent.includes("purchase_intent")) intent.push("purchase_intent");
+  if (commerceLike && (markers.cart_activity_likely || (requestClassification.cart_requests || 0) > 0)) intent.push("shopping");
+  if (commerceLike && (requestClassification.checkout_requests || 0) > 0 && !intent.includes("purchase_intent")) intent.push("purchase_intent");
 
-  if (markers.checkout_activity_likely) {
+  if (commerceLike && markers.checkout_activity_likely) {
     if (!intent.includes("shopping")) intent.push("shopping");
     if (!intent.includes("purchase_intent")) intent.push("purchase_intent");
   }
@@ -540,7 +570,7 @@ function buildInferredProfile(domain, state) {
 
   const explanationParts = [];
   if (requestEvents > 0) explanationParts.push("observable network activity");
-  if (markers.cart_activity_likely || markers.checkout_activity_likely) explanationParts.push("cart or checkout-related signals");
+  if (commerceLike && (markers.cart_activity_likely || markers.checkout_activity_likely)) explanationParts.push("cart or checkout-related signals");
   if (markers.recommendation_activity_likely) explanationParts.push("recommendation-related behavior");
   if (realPersistence) explanationParts.push("persistent storage signals");
   else if ((storage.cookie_count || 0) > 0) explanationParts.push("cookie activity");
