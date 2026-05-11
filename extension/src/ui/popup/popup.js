@@ -964,3 +964,201 @@ loadPopup().catch((err) => {
   setText("status", "Popup failed to load");
 });
 
+
+
+/* SHADOWPROFILE_HUMAN_MIRROR_UI_V1 */
+(() => {
+  function cleanModeText(text) {
+    return String(text || "")
+      .replaceAll("PASSIVE_DEFAULT", "Eco Mode")
+      .replaceAll("DEEP_INSPECT", "Deep Scan")
+      .replaceAll("Deep Inspect", "Deep Scan")
+      .replaceAll("Start Deep Inspect", "Start Deep Scan")
+      .replaceAll("Stop Deep Inspect", "Stop Deep Scan")
+      .replaceAll("Reset Site Summary", "Reset ShadowProfile")
+      .replaceAll("Export Session Artifact", "Export My ShadowProfile")
+      .replaceAll("Export Last Deep Inspect Artifact", "Export Last Deep Scan")
+      .replaceAll("Inferred Profile", "Your ShadowProfile")
+      .replaceAll("Why This Profile?", "Why You Look This Way")
+      .replaceAll("Reasoning", "What This Means")
+      .replaceAll("Session Summary", "Activity Snapshot")
+      .replaceAll("Request Events", "Observed Activity")
+      .replaceAll("Tracker Domains", "Tracking Sources")
+      .replaceAll("Signal Breakdown", "Behavior Signals")
+      .replaceAll("Recent Findings", "What Was Detected")
+      .replaceAll("Top Signals", "Strongest Signals")
+      .replaceAll("Top Vendors", "Platforms Seen")
+      .replaceAll("Top Categories", "Behavior Categories")
+      .replaceAll("Request Timeline", "Behavior Timeline")
+      .replaceAll("Top Endpoints", "Observed Behaviors")
+      .replaceAll("Top Tracker Domains", "Tracking Domains");
+  }
+
+  function lineAfter(label, text) {
+    const lines = String(text || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
+    const idx = lines.findIndex(x => x.toLowerCase() === label.toLowerCase());
+    if (idx >= 0 && lines[idx + 1]) return lines[idx + 1];
+    const inline = lines.find(x => x.toLowerCase().startsWith(label.toLowerCase() + ":"));
+    return inline ? inline.split(":").slice(1).join(":").trim() : "--";
+  }
+
+  function parseList(value) {
+    return String(value || "")
+      .replace(/^--$/,"")
+      .split(",")
+      .map(x => x.trim())
+      .filter(Boolean)
+      .slice(0, 6);
+  }
+
+  function inferArchetype(interests, bodyText) {
+    const t = String(bodyText || "").toLowerCase();
+    const joined = interests.join(" ").toLowerCase();
+
+    if (joined.includes("video") || t.includes("video_content") || t.includes("youtube")) {
+      return {
+        title: "Video Recommendation Profile",
+        icon: "watcher",
+        summary: "Platforms may see you as a video viewer whose attention can be shaped by recommendations."
+      };
+    }
+
+    if (joined.includes("shopping") || t.includes("cart") || t.includes("checkout")) {
+      return {
+        title: "Shopping Interest Profile",
+        icon: "shopper",
+        summary: "Platforms may see you as someone with shopping or product-discovery intent."
+      };
+    }
+
+    if (joined.includes("news")) {
+      return {
+        title: "News Reader Profile",
+        icon: "reader",
+        summary: "Platforms may see you as someone interested in current events and information feeds."
+      };
+    }
+
+    if (joined.includes("developer") || joined.includes("search")) {
+      return {
+        title: "Research / Tool User Profile",
+        icon: "builder",
+        summary: "Platforms may see you as someone using the web for research, tools, and repeated task sessions."
+      };
+    }
+
+    return {
+      title: "Low-Signal Browser Profile",
+      icon: "neutral",
+      summary: "ShadowProfile does not see enough strong behavior yet. Use Deep Scan on a site to build a clearer mirror."
+    };
+  }
+
+  function ensureHero() {
+    let hero = document.getElementById("shadowprofileMirrorHero");
+    if (hero) return hero;
+
+    hero = document.createElement("section");
+    hero.id = "shadowprofileMirrorHero";
+    hero.className = "sp-mirror-hero";
+
+    const anchor = document.body.firstElementChild;
+    if (anchor) {
+      document.body.insertBefore(hero, anchor.nextSibling);
+    } else {
+      document.body.prepend(hero);
+    }
+
+    return hero;
+  }
+
+  function humanizeStaticText() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode);
+    }
+
+    for (const node of nodes) {
+      const before = node.nodeValue;
+      const after = cleanModeText(before);
+      if (before !== after) node.nodeValue = after;
+    }
+
+    for (const el of Array.from(document.querySelectorAll("button"))) {
+      el.textContent = cleanModeText(el.textContent);
+    }
+  }
+
+  function renderMirrorHero() {
+    const bodyText = cleanModeText(document.body.innerText || "");
+
+    const domain =
+      lineAfter("ShadowProfile", bodyText) !== "--"
+        ? lineAfter("ShadowProfile", bodyText)
+        : "Current Browser";
+
+    const mode = lineAfter("Mode", bodyText);
+    const interests = parseList(lineAfter("Interests", bodyText));
+    const intent = parseList(lineAfter("Intent", bodyText));
+    const confidence = lineAfter("Confidence", bodyText);
+    const value = lineAfter("Value", bodyText);
+
+    const archetype = inferArchetype(interests, bodyText);
+
+    const interestHtml = interests.length
+      ? interests.map(x => `<span class="sp-pill">${x.replaceAll("_"," ")}</span>`).join("")
+      : `<span class="sp-muted">No strong interests yet</span>`;
+
+    const intentHtml = intent.length
+      ? intent.map(x => `<span class="sp-pill sp-pill-warm">${x.replaceAll("_"," ")}</span>`).join("")
+      : `<span class="sp-muted">No clear intent yet</span>`;
+
+    const hero = ensureHero();
+
+    hero.innerHTML = `
+      <div class="sp-avatar sp-avatar-${archetype.icon}">
+        <div class="sp-person"></div>
+        <div class="sp-badge"></div>
+      </div>
+
+      <div class="sp-mirror-copy">
+        <div class="sp-eyebrow">Your ShadowProfile</div>
+        <h2>${archetype.title}</h2>
+        <p>${archetype.summary}</p>
+
+        <div class="sp-mini-grid">
+          <div><strong>Site</strong><span>${domain}</span></div>
+          <div><strong>Mode</strong><span>${mode}</span></div>
+          <div><strong>Confidence</strong><span>${confidence}</span></div>
+          <div><strong>Value</strong><span>${value}</span></div>
+        </div>
+
+        <div class="sp-pill-row">
+          <strong>What you look like:</strong>
+          ${interestHtml}
+        </div>
+
+        <div class="sp-pill-row">
+          <strong>What you may be doing:</strong>
+          ${intentHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function tick() {
+    try {
+      humanizeStaticText();
+      renderMirrorHero();
+    } catch (err) {
+      console.warn("SHADOWPROFILE_HUMAN_MIRROR_UI_FAIL", err);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", tick);
+  setInterval(tick, 1200);
+
+  console.log("SHADOWPROFILE_HUMAN_MIRROR_UI_V1");
+})();
