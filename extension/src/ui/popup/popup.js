@@ -966,24 +966,6 @@ loadPopup().catch((err) => {
 
 
 
-
-/* SHADOWPROFILE_HUMAN_MIRROR_STABLE_FIELDS_V1 */
-function spMirrorText(id, fallback = "--") {
-  const el = document.getElementById(id);
-  const value = el ? String(el.textContent || "").trim() : "";
-  return value || fallback;
-}
-
-function spMirrorCleanValue(value) {
-  return String(value || "--")
-    .replace(/^Mode:\s*/i, "")
-    .replace(/^Interests:\s*/i, "")
-    .replace(/^Intent:\s*/i, "")
-    .replace(/^Confidence:\s*/i, "")
-    .replace(/^Value:\s*/i, "")
-    .trim() || "--";
-}
-
 /* SHADOWPROFILE_HUMAN_MIRROR_UI_V1 */
 (() => {
   function cleanModeText(text) {
@@ -1110,53 +1092,28 @@ function spMirrorCleanValue(value) {
   }
 
   function renderMirrorHero() {
+    const bodyText = cleanModeText(document.body.innerText || "");
 
     const domain =
-      spMirrorText("domain", "Current Browser");
+      lineAfter("ShadowProfile", bodyText) !== "--"
+        ? lineAfter("ShadowProfile", bodyText)
+        : "Current Browser";
 
-    const mode =
-      cleanModeText(spMirrorCleanValue(spMirrorText("runtimeMode", "--")));
+    const mode = lineAfter("Mode", bodyText);
+    const interests = parseList(lineAfter("Interests", bodyText));
+    const intent = parseList(lineAfter("Intent", bodyText));
+    const confidence = lineAfter("Confidence", bodyText);
+    const value = lineAfter("Value", bodyText);
 
-    const interests =
-      parseList(spMirrorCleanValue(spMirrorText("interests", "--")));
+    const archetype = inferArchetype(interests, bodyText);
 
-    const intent =
-      parseList(spMirrorCleanValue(spMirrorText("intent", "--")));
+    const interestHtml = interests.length
+      ? interests.map(x => `<span class="sp-pill">${x.replaceAll("_"," ")}</span>`).join("")
+      : `<span class="sp-muted">No strong interests yet</span>`;
 
-    const confidence =
-      spMirrorCleanValue(spMirrorText("confidence", "--"));
-
-    const value =
-      spMirrorCleanValue(spMirrorText("valueEstimate", "--"));
-
-    const bodyText =
-      [
-        domain,
-        mode,
-        interests.join(" "),
-        intent.join(" "),
-        confidence,
-        value
-      ].join(" ");
-
-    const archetype =
-      inferArchetype(interests, bodyText);
-
-    const interestHtml =
-      interests.length
-        ? interests.map(
-            x =>
-              `<span class="sp-pill">${x.replaceAll("_"," ")}</span>`
-          ).join("")
-        : `<span class="sp-muted">No strong interests yet</span>`;
-
-    const intentHtml =
-      intent.length
-        ? intent.map(
-            x =>
-              `<span class="sp-pill sp-pill-warm">${x.replaceAll("_"," ")}</span>`
-          ).join("")
-        : `<span class="sp-muted">No clear intent yet</span>`;
+    const intentHtml = intent.length
+      ? intent.map(x => `<span class="sp-pill sp-pill-warm">${x.replaceAll("_"," ")}</span>`).join("")
+      : `<span class="sp-muted">No clear intent yet</span>`;
 
     const hero = ensureHero();
 
@@ -1167,37 +1124,15 @@ function spMirrorCleanValue(value) {
       </div>
 
       <div class="sp-mirror-copy">
-
-        <div class="sp-eyebrow">
-          Your ShadowProfile
-        </div>
-
+        <div class="sp-eyebrow">Your ShadowProfile</div>
         <h2>${archetype.title}</h2>
-
         <p>${archetype.summary}</p>
 
         <div class="sp-mini-grid">
-
-          <div>
-            <strong>Site</strong>
-            <span>${domain}</span>
-          </div>
-
-          <div>
-            <strong>Mode</strong>
-            <span>${mode}</span>
-          </div>
-
-          <div>
-            <strong>Confidence</strong>
-            <span>${confidence}</span>
-          </div>
-
-          <div>
-            <strong>Value</strong>
-            <span>${value}</span>
-          </div>
-
+          <div><strong>Site</strong><span>${domain}</span></div>
+          <div><strong>Mode</strong><span>${mode}</span></div>
+          <div><strong>Confidence</strong><span>${confidence}</span></div>
+          <div><strong>Value</strong><span>${value}</span></div>
         </div>
 
         <div class="sp-pill-row">
@@ -1209,7 +1144,6 @@ function spMirrorCleanValue(value) {
           <strong>What you may be doing:</strong>
           ${intentHtml}
         </div>
-
       </div>
     `;
   }
