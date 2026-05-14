@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ShadowProfile</title>
+  <link rel="stylesheet" href="./popup_v2.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="avatar">
+        <div class="head"></div>
+        <div class="body"></div>
+        <div id="avatarBadge" class="badge">?</div>
+      </div>
+
+      <div class="hero-copy">
+        <div class="eyebrow">Your ShadowProfile</div>
+        <h1 id="profileTitle">Building your mirror...</h1>
+        <p id="profileSummary">ShadowProfile is reading local browser-visible signals.</p>
+      </div>
+    </section>
+
+    <section class="mode-card">
+      <div>
+        <strong id="siteLabel">Current site</strong>
+        <span id="modeLabel">Eco Mode</span>
+      </div>
+      <button id="toggleScan">Start Deep Scan</button>
+    </section>
+
+    <section class="quick-grid">
+      <div><span>Confidence</span><strong id="confidence">--</strong></div>
+      <div><span>Value</span><strong id="value">--</strong></div>
+      <div><span>Signals</span><strong id="signals">--</strong></div>
+      <div><span>Activity</span><strong id="activity">--</strong></div>
+    </section>
+
+    <section class="panel">
+      <h2>What the web may think</h2>
+      <div id="interestPills" class="pills"></div>
+    </section>
+
+    <section class="panel">
+      <h2>What you may be doing</h2>
+      <div id="intentPills" class="pills"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Why you look this way</h2>
+      <p id="whyText">No explanation yet.</p>
+    </section>
+
+    <details class="evidence">
+      <summary>Evidence details</summary>
+      <pre id="evidenceText">Loading...</pre>
+    </details>
+
+    <div class="actions">
+      <button id="resetProfile">Reset ShadowProfile</button>
+      <button id="exportProfile">Export My ShadowProfile</button>
+    </div>
+  </main>
+
+  <script type="module" src="./popup_v2.js"></script>
+</body>
+</html>
