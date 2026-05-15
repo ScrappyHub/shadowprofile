@@ -1,54 +1,70 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <title>ShadowProfile</title>
-  <link rel="stylesheet" href="./popup_v2.css" />
+  <link rel="stylesheet" href="./popup_v2.css">
 </head>
 <body>
-  <main class="app">
-    <section class="hero">
-      <div class="avatar">
-        <div class="head"></div>
-        <div class="body"></div>
-        <div id="avatarBadge" class="badge">?</div>
-      </div>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><div class="logo"></div><span>ShadowProfile</span></div>
+      <div id="modeBadge" class="mode">Eco Mode</div>
+    </header>
 
-      <div class="hero-copy">
-        <div class="eyebrow">Your ShadowProfile</div>
-        <h1 id="profileTitle">Building your mirror...</h1>
-        <p id="profileSummary">ShadowProfile is reading local browser-visible signals.</p>
-      </div>
-    </section>
-
-    <section class="mode-card">
-      <div>
-        <strong id="siteLabel">Current site</strong>
-        <span id="modeLabel">Eco Mode</span>
-      </div>
+    <section class="site-row">
+      <div class="site-icon">◎</div>
+      <div><h2 id="siteName">Loading...</h2><p>Current site</p></div>
       <button id="toggleScan">Start Deep Scan</button>
     </section>
 
-    <section class="quick-grid">
-      <div><span>Confidence</span><strong id="confidence">--</strong></div>
-      <div><span>Value</span><strong id="value">--</strong></div>
-      <div><span>Signals</span><strong id="signals">--</strong></div>
-      <div><span>Activity</span><strong id="activity">--</strong></div>
+    <section class="hero">
+      <div class="avatar"><div class="face"></div><div id="avatarBadge" class="avatar-badge">?</div></div>
+      <div class="hero-text">
+        <div class="eyebrow">Your ShadowProfile</div>
+        <h1 id="profileTitle">Building your mirror...</h1>
+        <p id="profileSummary">Reading local browser-visible signals.</p>
+        <div class="mini-badges">
+          <span id="confidenceBadge">Confidence: --</span>
+          <span id="valueBadge">Value: --</span>
+        </div>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>What the web may think</h2>
-      <div id="interestPills" class="pills"></div>
+    <section class="split">
+      <div class="card">
+        <h3>What you look like</h3>
+        <div id="lookPills" class="pills"></div>
+      </div>
+      <div class="card">
+        <h3>What you may be doing</h3>
+        <div id="doingList" class="list"></div>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>What you may be doing</h2>
-      <div id="intentPills" class="pills"></div>
+    <section class="score-card">
+      <h3>Privacy & exposure scores</h3>
+      <div class="scores">
+        <div><span>Tracking</span><strong id="trackingScore">--</strong><i></i></div>
+        <div><span>Personalization</span><strong id="personalScore">--</strong><i></i></div>
+        <div><span>Persistence</span><strong id="persistScore">--</strong><i></i></div>
+        <div><span>Transparency</span><strong id="transScore">--</strong><i></i></div>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>Why you look this way</h2>
-      <p id="whyText">No explanation yet.</p>
+    <section class="glance">
+      <h3>At a glance</h3>
+      <div class="glance-grid">
+        <div><span>Total Events</span><strong id="totalEvents">--</strong></div>
+        <div><span>Cookie Events</span><strong id="cookieEvents">--</strong></div>
+        <div><span>Platforms Seen</span><strong id="platformsSeen">--</strong></div>
+        <div><span>Session Time</span><strong id="sessionTime">--</strong></div>
+      </div>
+    </section>
+
+    <section class="meaning">
+      <h3>Why this matters</h3>
+      <p id="whyText">Sites build profiles to personalize your experience, predict what you may do next, and optimize what they show you. You stay in control.</p>
     </section>
 
     <details class="evidence">
@@ -56,10 +72,15 @@
       <pre id="evidenceText">Loading...</pre>
     </details>
 
-    <div class="actions">
-      <button id="resetProfile">Reset ShadowProfile</button>
-      <button id="exportProfile">Export My ShadowProfile</button>
-    </div>
+    <section class="actions">
+      <button id="resetBtn">Reset ShadowProfile</button>
+      <button id="exportBtn">Export My ShadowProfile</button>
+    </section>
+
+    <footer>
+      <span>Status: <b id="statusText">Verified</b></span>
+      <span>ShadowProfile 0.1.0 / mv3</span>
+    </footer>
   </main>
 
   <script type="module" src="./popup_v2.js"></script>

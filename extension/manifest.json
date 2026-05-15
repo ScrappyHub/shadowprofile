@@ -1,4 +1,4 @@
-﻿{
+{
     "manifest_version":  3,
     "name":  "ShadowProfile",
     "version":  "0.1.0",
@@ -20,7 +20,7 @@
                          ],
     "action":  {
                    "default_title":  "ShadowProfile",
-                   "default_popup":  "src/ui/popup/popup.html",
+                   "default_popup":  "src/ui/popup_v2/popup_v2.html",
                    "default_icon":  {
                                         "16":  "assets/icons/icon-16.png",
                                         "128":  "assets/icons/icon-128.png",
