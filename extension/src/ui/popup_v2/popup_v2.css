@@ -43,3 +43,104 @@ pre { white-space:pre-wrap; color:rgba(255,255,255,.62); font-size:11px; }
 .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px; }
 footer { display:flex; justify-content:space-between; color:rgba(255,255,255,.50); font-size:12px; padding:8px 2px 0; }
 footer b { color:#5cff9c; }
+
+/* SHADOWPROFILE_POPUP_V2_POLISH_FIX_V1 */
+
+/* Clean native scrollbar */
+html, body {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160,115,255,.55) rgba(255,255,255,.04);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.035);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(167,104,255,.85), rgba(52,210,255,.70));
+  border-radius: 999px;
+  border: 2px solid rgba(7,11,18,.9);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(190,135,255,.95), rgba(80,230,255,.9));
+}
+
+/* Better profile image */
+.avatar {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 26%, rgba(193,126,255,.95), rgba(90,56,180,.75) 38%, rgba(19,32,66,.95) 74%),
+    linear-gradient(135deg, #5f39d8, #11213c);
+}
+
+.avatar::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255,255,255,.10), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.face {
+  position: absolute;
+  left: 37px;
+  top: 25px;
+  width: 38px;
+  height: 62px;
+  border-radius: 999px 999px 24px 24px;
+  background:
+    radial-gradient(circle at 50% 23%, #080b14 0 29%, transparent 30%),
+    linear-gradient(180deg, #090b16 0%, #0d1021 100%);
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.42),
+    0 0 24px rgba(80,210,255,.22);
+  opacity: .98;
+}
+
+/* Badge should feel like a profile category, not debug text */
+.avatar-badge {
+  width: 40px;
+  height: 40px;
+  right: -5px;
+  bottom: 7px;
+  font-size: 10px;
+  text-transform: uppercase;
+  background: radial-gradient(circle at 50% 38%, rgba(171,100,255,.95), rgba(43,28,82,.98));
+  box-shadow: 0 0 20px rgba(165,95,255,.38);
+}
+
+/* Softer consumer language layout */
+.score-card h3::before {
+  content: "";
+}
+
+.score-card h3 {
+  color: #b58cff;
+}
+
+.evidence {
+  opacity: .86;
+}
+
+.evidence summary {
+  color: rgba(255,255,255,.78);
+}
+
+.evidence pre {
+  max-height: 180px;
+  overflow: auto;
+}
+
+/* Make cards breathe */
+.hero, .site-row, .topbar, .card, .score-card, .glance, .meaning {
+  box-shadow: 0 12px 28px rgba(0,0,0,.18);
+}

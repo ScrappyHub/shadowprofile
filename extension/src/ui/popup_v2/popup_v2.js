@@ -1,3 +1,12 @@
+function setTextSafe(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function setHtmlSafe(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = value;
+}
 function safeObject(v){ return v && typeof v === "object" ? v : {}; }
 function domainFromUrl(u){ try { return new URL(u).hostname.toLowerCase(); } catch { return "browser profile"; } }
 function modeText(m){ return m === "DEEP_INSPECT" ? "Deep Scan" : "Eco Mode"; }
@@ -53,13 +62,13 @@ function buildMirror(domain,state){
   const confidence = signalTotal>12 || (counts.total_events||0)>80 ? "High" : signalTotal>3 || (counts.total_events||0)>20 ? "Medium" : "Low";
   const value = (counts.total_events||0)>40 || (counts.user_action_events||0)>2 ? "Mid" : "Low";
 
-  let title="Low-Signal Profile", badge="?";
-  let summary="ShadowProfile does not see enough strong behavior yet. Run Deep Scan to build a clearer mirror.";
+  let title="Quiet Profile", badge="?";
+  let summary="Not much is visible yet. Deep Scan can help reveal what this site may be learning from your behavior.";
 
   if(domain.includes("chatgpt") || domain.includes("openai")){
-    title="Research / Tool User";
+    title="Research / Problem Solving Profile";
     badge="AI";
-    summary="Platforms may see you as someone using tools for questions, research, learning, problem solving, and productivity.";
+    summary="This site may see you as someone asking questions, solving problems, learning, or using AI as a thinking partner.";
   } else if(domain.includes("youtube")){
     title="Video Recommendation Profile";
     badge="play";
@@ -89,7 +98,7 @@ function setList(id, values){
   el.innerHTML="";
   for(const v of values.slice(0,5)){
     const d=document.createElement("div");
-    d.textContent="• "+pillText(v);
+    d.textContent="â€¢ "+pillText(v);
     el.appendChild(d);
   }
 }
@@ -101,7 +110,7 @@ function evidence(domain,state,mode,mirror){
     "Site: "+domain,
     "Mode: "+modeText(mode),
     "Profile: "+mirror.title,
-    "Confidence: "+mirror.confidence,
+    "Read: "+mirror.confidence,
     "Total events: "+(c.total_events||0),
     "Cookie events: "+(c.cookie_events||0),
     "User actions: "+(c.user_action_events||0),
@@ -126,35 +135,35 @@ async function boot(){
   const mirror=buildMirror(domain,state);
   const active=loaded.mode==="DEEP_INSPECT" && loaded.deepDomain===domain;
 
-  document.getElementById("siteName").textContent=domain;
-  document.getElementById("modeBadge").textContent=modeText(loaded.mode);
-  document.getElementById("modeLabel").textContent=modeText(loaded.mode);
-  document.getElementById("toggleScan").textContent=active ? "Stop Deep Scan" : "Start Deep Scan";
-  document.getElementById("profileTitle").textContent=mirror.title;
-  document.getElementById("profileSummary").textContent=mirror.summary;
-  document.getElementById("avatarBadge").textContent=mirror.badge;
-  document.getElementById("confidenceBadge").textContent="Confidence: "+mirror.confidence;
-  document.getElementById("valueBadge").textContent="Value: "+mirror.value;
-  document.getElementById("confidence").textContent=mirror.confidence;
-  document.getElementById("value").textContent=mirror.value;
+  setTextSafe("siteName", domain);
+  setTextSafe("modeBadge", modeText(loaded.mode));
+  setTextSafe("modeLabel", modeText(loaded.mode));
+  setTextSafe("toggleScan", active ? "Stop Deep Scan" : "Start Deep Scan");
+  setTextSafe("profileTitle", mirror.title);
+  setTextSafe("profileSummary", mirror.summary);
+  setTextSafe("avatarBadge", mirror.badge);
+  setTextSafe("confidenceBadge", "Read: " + mirror.confidence);
+  setTextSafe("valueBadge", "Profile Strength: " + mirror.value);
+  setTextSafe("confidence", mirror.confidence);
+  setTextSafe("value", mirror.value);
 
   setPills("lookPills",mirror.interests);
   setList("doingList",mirror.doing);
 
-  document.getElementById("trackingScore").textContent=scores.tracking ?? 0;
-  document.getElementById("personalScore").textContent=scores.personalization ?? 0;
-  document.getElementById("persistScore").textContent=scores.persistence ?? 0;
-  document.getElementById("transScore").textContent=scores.transparency ?? 100;
+  setTextSafe("trackingScore", scores.tracking ?? 0);
+  setTextSafe("personalScore", scores.personalization ?? 0);
+  setTextSafe("persistScore", scores.persistence ?? 0);
+  setTextSafe("transScore", scores.transparency ?? 100);
 
-  document.getElementById("totalEvents").textContent=counts.total_events ?? 0;
-  document.getElementById("cookieEvents").textContent=counts.cookie_events ?? 0;
-  document.getElementById("platformsSeen").textContent=Object.keys(safeObject(safeObject(state.request_classification).vendors)).length || 1;
-  document.getElementById("sessionTime").textContent=fmtDuration(counts.duration_ms || 0);
+  setTextSafe("totalEvents", counts.total_events ?? 0);
+  setTextSafe("cookieEvents", counts.cookie_events ?? 0);
+  setTextSafe("platformsSeen", Object.keys(safeObject(safeObject(state.request_classification).vendors)).length || 1);
+  setTextSafe("sessionTime", fmtDuration(counts.duration_ms || 0));
 
-  document.getElementById("whyText").textContent =
+  setTextSafe("whyText",
     "Sites use patterns like these to personalize, rank, recommend, and predict what you may do next. ShadowProfile keeps this mirror local on your device.";
 
-  document.getElementById("evidenceText").textContent=evidence(domain,state,loaded.mode,mirror);
+  setTextSafe("evidenceText", evidence(domain,state,loaded.mode,mirror));
 
   document.getElementById("toggleScan").onclick=async()=>{
     await send("CONTROL_SET_MODE",{mode:active?"PASSIVE_DEFAULT":"DEEP_INSPECT",domain});
@@ -177,6 +186,6 @@ async function boot(){
 
 boot().catch(err=>{
   console.error("POPUP_V2_FAIL",err);
-  document.getElementById("profileTitle").textContent="ShadowProfile could not load";
-  document.getElementById("profileSummary").textContent=String(err);
+  setTextSafe("profileTitle", "ShadowProfile could not load");
+  setTextSafe("profileSummary", String(err));
 });
