@@ -98,7 +98,7 @@ function setList(id, values){
   el.innerHTML="";
   for(const v of values.slice(0,5)){
     const d=document.createElement("div");
-    d.textContent="Ã¢â‚¬Â¢ "+pillText(v);
+    d.textContent="ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ "+pillText(v);
     el.appendChild(d);
   }
 }
