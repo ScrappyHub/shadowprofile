@@ -98,7 +98,7 @@ function setList(id, values){
   el.innerHTML="";
   for(const v of values.slice(0,5)){
     const d=document.createElement("div");
-    d.textContent="â€¢ "+pillText(v);
+    d.textContent="Ã¢â‚¬Â¢ "+pillText(v);
     el.appendChild(d);
   }
 }
@@ -160,8 +160,7 @@ async function boot(){
   setTextSafe("platformsSeen", Object.keys(safeObject(safeObject(state.request_classification).vendors)).length || 1);
   setTextSafe("sessionTime", fmtDuration(counts.duration_ms || 0));
 
-  setTextSafe("whyText",
-    "Sites use patterns like these to personalize, rank, recommend, and predict what you may do next. ShadowProfile keeps this mirror local on your device.";
+  setTextSafe("whyText", "Sites use patterns like these to personalize, rank, recommend, and predict what you may do next. ShadowProfile keeps this mirror local on your device.");
 
   setTextSafe("evidenceText", evidence(domain,state,loaded.mode,mirror));
 
