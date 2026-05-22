@@ -225,3 +225,21 @@ html, body {
 .hero {
   grid-template-columns: 124px 1fr;
 }
+
+/* SHADOWPROFILE_POPUP_V2_FINAL_WORDING_V1 */
+.avatar-badge {
+  min-width: 34px;
+  height: 26px;
+  font-size: 9px;
+  right: 4px;
+  bottom: 8px;
+  border-width: 2px;
+}
+
+.score-card h3 {
+  font-size: 12px;
+}
+
+.hero h1 {
+  letter-spacing: -0.02em;
+}

@@ -59,8 +59,8 @@ function buildMirror(domain,state){
   if(doing.length===0) doing.push("not enough behavior yet");
 
   const signalTotal = Object.values(signals).reduce((a,b)=>a+Number(b||0),0);
-  const confidence = signalTotal>12 || (counts.total_events||0)>80 ? "High" : signalTotal>3 || (counts.total_events||0)>20 ? "Medium" : "Low";
-  const value = (counts.total_events||0)>40 || (counts.user_action_events||0)>2 ? "Mid" : "Low";
+  let confidence = signalTotal>12 || (counts.total_events||0)>80 ? "High" : signalTotal>3 || (counts.total_events||0)>20 ? "Medium" : "Low"; if(title !== "Quiet Profile" && title !== "Low-Signal Profile" && confidence === "Low") confidence = "Medium";
+  let value = (counts.total_events||0)>40 || (counts.user_action_events||0)>2 ? "Mid" : "Low"; if(title !== "Quiet Profile" && title !== "Low-Signal Profile" && value === "Low") value = "Mid";
 
   let title="Quiet Profile", badge="?";
   let summary="Not much is visible yet. Deep Scan can help reveal what this site may be learning from your behavior.";
@@ -117,7 +117,7 @@ function evidence(domain,state,mode,mirror){
     "Site: " + domain,
     "Mode: " + modeText(mode),
     "Profile: " + mirror.title,
-    "Read: " + mirror.confidence,
+    "Profile Read: " + mirror.confidence,
     "Profile Strength: " + mirror.value,
     "",
     "What you look like:",
@@ -163,7 +163,7 @@ async function boot(){
   setTextSafe("profileTitle", mirror.title);
   setTextSafe("profileSummary", mirror.summary);
   setTextSafe("avatarBadge", mirror.badge);
-  setTextSafe("confidenceBadge", "Read: " + mirror.confidence);
+  setTextSafe("confidenceBadge", "Profile Read: " + mirror.confidence);
   setTextSafe("valueBadge", "Profile Strength: " + mirror.value);
   setTextSafe("confidence", mirror.confidence);
   setTextSafe("value", mirror.value);
