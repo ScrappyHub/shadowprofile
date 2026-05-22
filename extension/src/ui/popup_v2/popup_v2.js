@@ -98,28 +98,49 @@ function setList(id, values){
   el.innerHTML="";
   for(const v of values.slice(0,5)){
     const d=document.createElement("div");
-    d.textContent="ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ "+pillText(v);
+    d.textContent = "- " + pillText(v);
     el.appendChild(d);
   }
 }
 
 function evidence(domain,state,mode,mirror){
-  const c=safeObject(state.counts);
-  const s=safeObject(state.signal_breakdown);
+  const c = safeObject(state.counts);
+  const s = safeObject(state.signal_breakdown);
+
+  const visibleSignals = Object.entries(s)
+    .filter(([k,v]) => Number(v || 0) > 0)
+    .map(([k,v]) => "- " + pillText(k) + ": " + String(v));
+
   return [
-    "Site: "+domain,
-    "Mode: "+modeText(mode),
-    "Profile: "+mirror.title,
-    "Read: "+mirror.confidence,
-    "Total events: "+(c.total_events||0),
-    "Cookie events: "+(c.cookie_events||0),
-    "User actions: "+(c.user_action_events||0),
+    "ShadowProfile Export",
     "",
-    "Behavior signals:",
-    JSON.stringify(s,null,2),
+    "Site: " + domain,
+    "Mode: " + modeText(mode),
+    "Profile: " + mirror.title,
+    "Read: " + mirror.confidence,
+    "Profile Strength: " + mirror.value,
     "",
-    "Reasoning:",
-    mirror.reasons.length ? mirror.reasons.join(", ") : "observed site activity"
+    "What you look like:",
+    mirror.interests.map(x => "- " + pillText(x)).join("\n"),
+    "",
+    "What you may be doing:",
+    mirror.doing.map(x => "- " + pillText(x)).join("\n"),
+    "",
+    "Why ShadowProfile thinks this:",
+    mirror.reasons.length
+      ? mirror.reasons.map(x => "- " + pillText(x)).join("\n")
+      : "- observed site activity",
+    "",
+    "Activity snapshot:",
+    "- Total events: " + (c.total_events || 0),
+    "- Cookie events: " + (c.cookie_events || 0),
+    "- User actions: " + (c.user_action_events || 0),
+    "",
+    "Visible behavior signals:",
+    visibleSignals.length ? visibleSignals.join("\n") : "- no strong categorized signals yet",
+    "",
+    "Privacy note:",
+    "This export is generated locally. ShadowProfile does not need remote servers to explain this profile."
   ].join("\n");
 }
 
