@@ -178,3 +178,17 @@ Write-Utf8NoBomLf `
 
 Write-Host "SHADOWPROFILE_RELEASE_PACKAGES_BUILT_OK" -ForegroundColor Green
 Write-Host $ReleaseRoot -ForegroundColor Cyan
+
+
+# SHADOWPROFILE_OPERA_FALLBACK_V1
+$ReleaseRoot = "C:\dev\shadowprofile_release"
+$ChromeZip = Join-Path $ReleaseRoot "shadowprofile_chrome.zip"
+$OperaZip = Join-Path $ReleaseRoot "shadowprofile_opera.zip"
+
+if((Test-Path $ChromeZip) -and -not (Test-Path $OperaZip)){
+  Copy-Item $ChromeZip $OperaZip -Force
+}
+
+if(-not (Test-Path $OperaZip)){
+  throw "MISSING_OPERA_RELEASE_ZIP"
+}
