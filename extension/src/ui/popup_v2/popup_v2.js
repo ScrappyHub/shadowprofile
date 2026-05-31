@@ -29,57 +29,87 @@ async function getState(domain){
 }
 
 function buildMirror(domain,state){
-  const counts=safeObject(state.counts);
-  const signals=safeObject(state.signal_breakdown);
-  const cats=safeObject(safeObject(state.request_classification).categories);
-  const interests=[], doing=[], reasons=[];
+  const counts = safeObject(state.counts);
+  const signals = safeObject(state.signal_breakdown);
+
+  const interests = [];
+  const doing = [];
+  const reasons = [];
+
+  let title = "Quiet Profile";
+  let badge = "SP";
+  let summary = "Not much is visible yet. Deep Scan can help reveal what this site may be learning from your behavior.";
 
   if(domain.includes("chatgpt") || domain.includes("openai")){
-    interests.push("curious","information seeker","problem solver","AI assistant user");
-    doing.push("asking questions & getting answers","researching or learning something","solving problems or troubleshooting","brainstorming or getting ideas");
+    title = "Research / Problem Solving Profile";
+    badge = "AI";
+    summary = "This site may see you as someone asking questions, solving problems, learning, or using AI as a thinking partner.";
+    interests.push("curious", "information seeker", "problem solver", "AI assistant user");
+    doing.push("asking questions", "researching or learning", "solving problems", "brainstorming ideas");
     reasons.push("active tool use");
-  }
-  if(domain.includes("youtube") || signals.recommendation || signals.video_delivery){
-    interests.push("video viewer","recommendation feed user","entertainment");
-    doing.push("watching videos","responding to recommendations","browsing a feed");
+  } else if(domain.includes("youtube") || signals.recommendation || signals.video_delivery){
+    title = "Video Recommendation Profile";
+    badge = "PLAY";
+    summary = "Platforms may see you as a video viewer whose attention can be shaped by recommendations and repeated engagement.";
+    interests.push("video viewer", "recommendation feed user", "entertainment");
+    doing.push("watching videos", "browsing recommendations", "responding to a feed");
     reasons.push("video and recommendation activity");
-  }
-  if(domain.includes("amazon") || domain.includes("ebay") || signals.cart || signals.checkout){
-    interests.push("shopping","product research","comparison browsing");
-    doing.push("exploring products","comparing options","showing purchase intent");
+  } else if(domain.includes("amazon") || domain.includes("ebay") || signals.cart || signals.checkout){
+    title = "Shopping Interest Profile";
+    badge = "BAG";
+    summary = "Platforms may see you as someone exploring products, comparing options, or likely to respond to shopping prompts.";
+    interests.push("shopping", "product research", "comparison browsing");
+    doing.push("exploring products", "comparing options", "showing purchase intent");
     reasons.push("shopping-related activity");
   }
 
-  if((counts.user_action_events||0)>2 || (counts.total_events||0)>30){
-    if(!doing.includes("active session")) doing.push("active session");
+  if((counts.user_action_events || 0) > 2 || (counts.total_events || 0) > 30){
+    if(!doing.includes("active session")){
+      doing.push("active session");
+    }
     reasons.push("repeated interaction");
   }
 
-  if(interests.length===0) interests.push("low signal");
-  if(doing.length===0) doing.push("not enough behavior yet");
-
-  const signalTotal = Object.values(signals).reduce((a,b)=>a+Number(b||0),0);
-  let confidence = signalTotal>12 || (counts.total_events||0)>80 ? "High" : signalTotal>3 || (counts.total_events||0)>20 ? "Medium" : "Low"; if(title !== "Quiet Profile" && title !== "Low-Signal Profile" && confidence === "Low") confidence = "Medium";
-  let value = (counts.total_events||0)>40 || (counts.user_action_events||0)>2 ? "Mid" : "Low"; if(title !== "Quiet Profile" && title !== "Low-Signal Profile" && value === "Low") value = "Mid";
-
-  let title="Quiet Profile", badge="?";
-  let summary="Not much is visible yet. Deep Scan can help reveal what this site may be learning from your behavior.";
-
-  if(domain.includes("chatgpt") || domain.includes("openai")){
-    title="Research / Problem Solving Profile";
-    badge="AI";
-    summary="This site may see you as someone asking questions, solving problems, learning, or using AI as a thinking partner.";
-  } else if(domain.includes("youtube")){
-    title="Video Recommendation Profile";
-    badge="play";
-    summary="Platforms may see you as a video viewer whose attention can be shaped by recommendations and repeated engagement.";
-  } else if(domain.includes("amazon")){
-    title="Shopping Interest Profile";
-    badge="bag";
-    summary="Platforms may see you as someone exploring products, comparing options, or likely to respond to shopping prompts.";
+  if(interests.length === 0){
+    interests.push("low signal");
   }
 
-  return {title,badge,summary,interests,doing,confidence,value,reasons};
+  if(doing.length === 0){
+    doing.push("not enough behavior yet");
+  }
+
+  const signalTotal = Object.values(signals).reduce((a,b) => a + Number(b || 0), 0);
+
+  let confidence =
+    signalTotal > 12 || (counts.total_events || 0) > 80
+      ? "High"
+      : signalTotal > 3 || (counts.total_events || 0) > 20
+        ? "Medium"
+        : "Low";
+
+  let value =
+    (counts.total_events || 0) > 40 || (counts.user_action_events || 0) > 2
+      ? "Mid"
+      : "Low";
+
+  if(title !== "Quiet Profile" && confidence === "Low"){
+    confidence = "Medium";
+  }
+
+  if(title !== "Quiet Profile" && value === "Low"){
+    value = "Mid";
+  }
+
+  return {
+    title,
+    badge,
+    summary,
+    interests,
+    doing,
+    confidence,
+    value,
+    reasons
+  };
 }
 
 function setPills(id, values){
