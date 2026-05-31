@@ -56,48 +56,111 @@ function addLines(id, arr){
 }
 
 async function load(){
-  const tabs = await chrome.tabs.query({active:true,currentWindow:true});
-  const url = tabs?.[0]?.url || "";
-  let domain = "browser profile";
-  try { domain = new URL(url).hostname.toLowerCase(); } catch {}
-
   const r = await chrome.storage.local.get(["shadowprofile_domain_state"]);
   const all = r.shadowprofile_domain_state || {};
-  const state = safe(all[domain]);
+
+  const domains = Object.entries(all)
+    .map(([d,s]) => [d, safe(s).counts?.total_events || 0, safe(s)])
+    .filter(([d]) => !String(d).includes("chrome-extension") && !String(d).match(/^[a-z]{32}$/))
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,12);
+
+  const primary = domains[0] || ["browser profile", 0, {}];
+  const domain = primary[0];
+  const state = primary[2];
   const counts = safe(state.counts);
 
-  const category = categoryFor(domain);
-  const domains = Object.entries(all).map(([d,s]) => [d, safe(s.counts).total_events || 0]).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const total = domains.reduce((a,[,v])=>a+v,0) || 1;
+  const totalEvents = domains.reduce((a,[,v]) => a + Number(v || 0), 0);
+  const totalCookies = domains.reduce((a,[,,s]) => a + Number(safe(s.counts).cookie_events || 0), 0);
+  const totalActions = domains.reduce((a,[,,s]) => a + Number(safe(s.counts).user_action_events || 0), 0);
 
-  $("profileTitle").textContent = titleFor(category);
-  $("profileSummary").textContent = summaryFor(category);
-  $("readChip").textContent = "Profile Read: " + ((counts.total_events || 0) > 80 ? "High" : (counts.total_events || 0) > 20 ? "Medium" : "Low");
-  $("strengthChip").textContent = "Profile Strength: " + ((counts.total_events || 0) > 40 ? "Mid" : "Low");
-  $("domainChip").textContent = "Sites Seen: " + Object.keys(all).length;
-  $("avatarBadge").textContent = category === "ai" ? "AI" : category === "shopping" ? "BAG" : category === "video" ? "PLAY" : "SP";
+  let category = categoryFor(domain);
+
+  const schoolSignals = domains.some(([d]) =>
+    d.includes("purdue") ||
+    d.includes("brightspace") ||
+    d.includes("pearson") ||
+    d.includes("wgu")
+  );
+
+  if(schoolSignals && category !== "ai"){
+    category = "glasses";
+  }
+
+  $("profileTitle").textContent =
+    category === "glasses" && schoolSignals
+      ? "Student / Learning Profile"
+      : titleFor(category);
+
+  $("profileSummary").textContent =
+    category === "glasses" && schoolSignals
+      ? "Your browser activity suggests coursework, learning platforms, assignments, research, and repeated study sessions."
+      : summaryFor(category);
+
+  $("readChip").textContent =
+    "Profile Read: " + (totalEvents > 2500 ? "High" : totalEvents > 500 ? "Medium" : "Low");
+
+  $("strengthChip").textContent =
+    "Profile Strength: " + (totalEvents > 1000 ? "High" : totalEvents > 100 ? "Mid" : "Low");
+
+  $("domainChip").textContent =
+    "Sites Seen: " + String(domains.length || Object.keys(all).length || 0);
+
+  $("avatarBadge").textContent =
+    category === "ai" ? "AI" :
+    category === "shopping" ? "BAG" :
+    category === "video" ? "PLAY" :
+    schoolSignals ? "EDU" :
+    "SP";
 
   const portrait = document.querySelector(".portrait");
   portrait.className = "portrait " + category + " glasses";
   document.querySelector(".avatar-scene").innerHTML = "<span></span>";
 
-  addPills("lookList", traitsFor(category));
-  addLines("doingList", doingFor(category));
+  const traits =
+    schoolSignals
+      ? ["student", "information seeker", "coursework", "research mode"]
+      : traitsFor(category);
 
-  $("totalEvents").textContent = String(counts.total_events || 0);
-  $("cookieEvents").textContent = String(counts.cookie_events || 0);
-  $("userActions").textContent = String(counts.user_action_events || 0);
-  $("sitesSeen").textContent = String(Object.keys(all).length || 1);
+  const doing =
+    schoolSignals
+      ? ["studying or learning", "using course platforms", "researching assignments", "returning to school tools"]
+      : doingFor(category);
+
+  addPills("lookList", traits);
+  addLines("doingList", doing);
+
+  $("totalEvents").textContent = String(totalEvents);
+  $("cookieEvents").textContent = String(totalCookies);
+  $("userActions").textContent = String(totalActions);
+  $("sitesSeen").textContent = String(domains.length || Object.keys(all).length || 0);
 
   $("domainMap").innerHTML = "";
-  for(const [d,v] of domains){
+
+  const max = Math.max(1, ...domains.map(([,v]) => Number(v || 0)));
+
+  for(const [d,v] of domains.slice(0,10)){
     const row = document.createElement("div");
     row.className = "domain-row";
-    row.innerHTML = `<div>${d}<div class="bar"><i style="width:${Math.max(4,Math.round((v/total)*100))}%"></i></div></div><strong>${v}</strong>`;
+    row.innerHTML =
+      `<div>${d}<div class="bar"><i style="width:${Math.max(4,Math.round((Number(v || 0)/max)*100))}%"></i></div></div><strong>${v}</strong>`;
     $("domainMap").appendChild(row);
   }
 
-  $("evidence").textContent = JSON.stringify({domain, profile:titleFor(category), traits:traitsFor(category), doing:doingFor(category), counts}, null, 2);
+  $("evidence").textContent = JSON.stringify({
+    profile_scope: "browser-wide",
+    primary_domain: domain,
+    profile: $("profileTitle").textContent,
+    traits,
+    doing,
+    totals: {
+      total_events: totalEvents,
+      cookie_events: totalCookies,
+      user_actions: totalActions,
+      sites_seen: domains.length
+    },
+    top_domains: domains.map(([d,v]) => ({domain:d,total_events:v}))
+  }, null, 2);
 }
 
 $("refreshBtn").onclick = load;
