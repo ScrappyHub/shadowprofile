@@ -28,7 +28,7 @@
                                         "32":  "assets/icons/icon-32.png"
                                     }
                },
-    "options_page":  "src/ui/dashboard/dashboard.html",
+    "options_page":  "src/ui/workbench/workbench.html",
     "content_scripts":  [
                             {
                                 "matches":  [

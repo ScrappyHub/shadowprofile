@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ShadowProfile Workbench</title>
+  <link rel="stylesheet" href="./workbench.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="logo"></div><strong>ShadowProfile</strong></div>
+    <div class="status">Local mirror workbench</div>
+    <button id="refreshBtn">Refresh Mirror</button>
+    <button id="exportBtn">Export Full Profile</button>
+    <button id="resetBtn" class="danger">Reset Browser Mirror</button>
+    <div class="privacy">Local-first. No cloud profile. You stay in control.</div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="portrait">
+        <div id="avatarScene" class="avatar-scene"></div>
+        <div id="avatarBadge" class="badge">SP</div>
+      </div>
+
+      <div>
+        <div class="eyebrow">Your ShadowProfile</div>
+        <h1 id="profileTitle">Building your browser mirror...</h1>
+        <p id="profileSummary">ShadowProfile builds this locally from browser-visible activity.</p>
+
+        <div class="chips">
+          <span id="readChip">Profile Read: --</span>
+          <span id="strengthChip">Profile Strength: --</span>
+          <span id="domainChip">Sites Seen: --</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid two">
+      <div class="card">
+        <h2>What you look like</h2>
+        <div id="lookList" class="pill-list"></div>
+      </div>
+      <div class="card">
+        <h2>What you may be doing</h2>
+        <div id="doingList" class="line-list"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Profile map</h2>
+      <div id="domainMap" class="domain-map"></div>
+    </section>
+
+    <section class="grid four">
+      <div class="metric"><span>Total Events</span><strong id="totalEvents">--</strong></div>
+      <div class="metric"><span>Cookie Events</span><strong id="cookieEvents">--</strong></div>
+      <div class="metric"><span>User Actions</span><strong id="userActions">--</strong></div>
+      <div class="metric"><span>Sites Seen</span><strong id="sitesSeen">--</strong></div>
+    </section>
+
+    <section class="card">
+      <h2>Why this matters</h2>
+      <p id="whyText">Sites use behavior patterns to personalize, rank, recommend, and predict what you may do next.</p>
+    </section>
+
+    <section class="card">
+      <h2>Evidence details</h2>
+      <pre id="evidence">Loading...</pre>
+    </section>
+  </main>
+
+  <script type="module" src="./workbench.js"></script>
+</body>
+</html>

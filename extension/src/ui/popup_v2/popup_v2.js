@@ -223,7 +223,7 @@ async function boot(){
     await send("CONTROL_RESET_DOMAIN",{domain});
     location.reload();
   };
-  document.getElementById("exportBtn").onclick=()=>{
+  const openWorkbenchBtn = document.getElementById("openWorkbench"); if(openWorkbenchBtn){ openWorkbenchBtn.onclick=()=>chrome.runtime.openOptionsPage(); } document.getElementById("exportBtn").onclick=()=>{
     const blob=new Blob([document.getElementById("evidenceText").textContent],{type:"text/plain"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
