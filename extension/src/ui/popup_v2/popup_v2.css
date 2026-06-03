@@ -243,3 +243,58 @@ html, body {
 .hero h1 {
   letter-spacing: -0.02em;
 }
+
+
+/* SHADOWPROFILE_RACE_NEUTRAL_AVATAR_V1 */
+.avatar,
+.portrait {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(144,92,255,.42), transparent 38%),
+    linear-gradient(145deg, #171f35, #090d17 78%) !important;
+}
+
+.face,
+.avatar-scene::before,
+.avatar-scene::after {
+  background: #070b14 !important;
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+/* abstract head */
+.face,
+.avatar::before,
+.avatar-scene::before {
+  box-shadow:
+    0 0 0 7px rgba(255,255,255,.035),
+    0 0 28px rgba(118,84,255,.28) !important;
+}
+
+/* abstract shoulders */
+.avatar::after,
+.avatar-scene::after {
+  box-shadow: 0 -10px 30px rgba(95,72,255,.18) !important;
+}
+
+/* remove any human/race visual coding */
+.face,
+.avatar::before,
+.avatar::after,
+.avatar-scene::before,
+.avatar-scene::after {
+  filter: none !important;
+}
+
+/* accessory badges only, no face/race */
+.avatar-badge,
+.badge {
+  background: linear-gradient(135deg, #8b5cff, #35d7ff) !important;
+  color: #fff !important;
+  border-color: rgba(255,255,255,.34) !important;
+  text-transform: uppercase;
+}
+
+/* category-specific symbolic accessories */
+.avatar-badge::after,
+.badge::after {
+  content: "";
+}
