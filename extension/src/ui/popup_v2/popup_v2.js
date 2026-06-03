@@ -54,12 +54,12 @@ function buildMirror(domain,state){
     interests.push("video viewer", "recommendation feed user", "entertainment");
     doing.push("watching videos", "browsing recommendations", "responding to a feed");
     reasons.push("video and recommendation activity");
-  } else if(domain.includes("amazon") || domain.includes("ebay") || signals.cart || signals.checkout){
-    title = "Shopping Interest Profile";
+  } else if(domain.includes("amazon") || domain.includes("ebay") || domain.includes("walgreens") || domain.includes("cvs") || domain.includes("riteaid") || domain.includes("walmart") || domain.includes("target") || signals.cart || signals.checkout){
+    title = (domain.includes("walgreens") || domain.includes("cvs") || domain.includes("riteaid")) ? "Pharmacy / Personal Care Profile" : "Shopping Interest Profile";
     badge = "BAG";
-    summary = "Platforms may see you as someone exploring products, comparing options, or likely to respond to shopping prompts.";
-    interests.push("shopping", "product research", "comparison browsing");
-    doing.push("exploring products", "comparing options", "showing purchase intent");
+    summary = (domain.includes("walgreens") || domain.includes("cvs") || domain.includes("riteaid")) ? "This site may see you as someone browsing pharmacy, wellness, or personal care products." : "Platforms may see you as someone exploring products, comparing options, or likely to respond to shopping prompts.";
+    if(domain.includes("walgreens") || domain.includes("cvs") || domain.includes("riteaid")){ interests.push("pharmacy", "personal care", "wellness browsing"); } else { interests.push("shopping", "product research", "comparison browsing"); }
+    if(domain.includes("walgreens") || domain.includes("cvs") || domain.includes("riteaid")){ doing.push("browsing health products", "checking personal care items", "exploring pharmacy services"); } else { doing.push("exploring products", "comparing options", "showing purchase intent"); }
     reasons.push("shopping-related activity");
   }
 
