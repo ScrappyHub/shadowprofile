@@ -1,3 +1,25 @@
+function setAvatarProfileClass(badge){
+  const avatar = document.querySelector(".avatar");
+  if(!avatar) return;
+
+  avatar.classList.remove(
+    "avatar-profile-ai",
+    "avatar-profile-shopping",
+    "avatar-profile-video",
+    "avatar-profile-news",
+    "avatar-profile-care",
+    "avatar-profile-quiet"
+  );
+
+  const b = String(badge || "").toLowerCase();
+
+  if(b === "ai") avatar.classList.add("avatar-profile-ai");
+  else if(b === "bag") avatar.classList.add("avatar-profile-shopping");
+  else if(b === "play") avatar.classList.add("avatar-profile-video");
+  else if(b === "news") avatar.classList.add("avatar-profile-news");
+  else if(b === "care") avatar.classList.add("avatar-profile-care");
+  else avatar.classList.add("avatar-profile-quiet");
+}
 function setTextSafe(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
@@ -183,7 +205,7 @@ async function boot(){
   setTextSafe("toggleScan", active ? "Stop Deep Scan" : "Start Deep Scan");
   setTextSafe("profileTitle", mirror.title);
   setTextSafe("profileSummary", mirror.summary);
-  setTextSafe("avatarBadge", mirror.badge);
+  setTextSafe("avatarBadge", mirror.badge); setAvatarProfileClass(mirror.badge);
   setTextSafe("confidenceBadge", "Profile Read: " + mirror.confidence);
   setTextSafe("valueBadge", "Profile Strength: " + mirror.value);
   setTextSafe("confidence", mirror.confidence);

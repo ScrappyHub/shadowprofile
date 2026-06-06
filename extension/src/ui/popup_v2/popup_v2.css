@@ -329,3 +329,176 @@ html, body {
   background: #35d7ff;
   box-shadow: 0 0 18px rgba(53,215,255,.75);
 }
+
+/* SHADOWPROFILE_AVATAR_CATEGORY_VISUALS_V1 */
+
+/* shared neutral mirror canvas */
+.avatar {
+  isolation: isolate;
+}
+
+.avatar::before,
+.avatar::after {
+  z-index: 2;
+}
+
+.avatar .face,
+.face {
+  z-index: 3;
+}
+
+/* AI: glasses + idea spark */
+.avatar-profile-ai::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 38px;
+  width: 50px;
+  height: 18px;
+  border: 3px solid rgba(220,205,255,.95);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,.18),
+    0 0 18px rgba(175,110,255,.55);
+  z-index: 8;
+}
+
+.avatar-profile-ai::after {
+  content: "?";
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  font-size: 30px;
+  font-weight: 900;
+  color: #ffe680;
+  text-shadow: 0 0 16px rgba(255,230,128,.75);
+  z-index: 9;
+}
+
+/* Shopping: bag handle + cart/product glow */
+.avatar-profile-shopping {
+  background:
+    radial-gradient(circle at 72% 26%, rgba(86,217,255,.28), transparent 24%),
+    radial-gradient(circle at 38% 55%, rgba(158,95,255,.42), transparent 45%),
+    linear-gradient(145deg, #171f35, #090d17 78%) !important;
+}
+
+.avatar-profile-shopping::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 24px;
+  width: 52px;
+  height: 58px;
+  border-radius: 16px 16px 12px 12px;
+  border: 3px solid rgba(100,220,255,.85);
+  border-top: 0;
+  box-shadow: 0 0 22px rgba(80,210,255,.42);
+  z-index: 8;
+}
+
+.avatar-profile-shopping::after {
+  content: "";
+  position: absolute;
+  left: 44px;
+  top: 19px;
+  width: 26px;
+  height: 18px;
+  border-radius: 999px 999px 0 0;
+  border: 3px solid rgba(100,220,255,.85);
+  border-bottom: 0;
+  z-index: 9;
+}
+
+/* News: paper/card lines + headline stripe */
+.avatar-profile-news {
+  background:
+    radial-gradient(circle at 72% 24%, rgba(255,255,255,.11), transparent 20%),
+    radial-gradient(circle at 36% 56%, rgba(158,95,255,.38), transparent 42%),
+    linear-gradient(145deg, #172236, #090d17 78%) !important;
+}
+
+.avatar-profile-news::before {
+  content: "";
+  position: absolute;
+  left: 28px;
+  top: 24px;
+  width: 58px;
+  height: 66px;
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.04));
+  border: 2px solid rgba(180,210,255,.32);
+  box-shadow: 0 0 24px rgba(120,150,255,.28);
+  z-index: 8;
+}
+
+.avatar-profile-news::after {
+  content: "";
+  position: absolute;
+  left: 39px;
+  top: 42px;
+  width: 37px;
+  height: 29px;
+  background:
+    linear-gradient(#62d7ff,#62d7ff) 0 0 / 100% 3px no-repeat,
+    linear-gradient(#62d7ff,#62d7ff) 0 10px / 80% 3px no-repeat,
+    linear-gradient(#62d7ff,#62d7ff) 0 20px / 62% 3px no-repeat;
+  opacity: .95;
+  z-index: 9;
+}
+
+/* Video: play button + feed ring */
+.avatar-profile-video::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 30px;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  border: 3px solid rgba(180,120,255,.75);
+  box-shadow: 0 0 24px rgba(170,100,255,.45);
+  z-index: 8;
+}
+
+.avatar-profile-video::after {
+  content: "";
+  position: absolute;
+  left: 54px;
+  top: 47px;
+  width: 0;
+  height: 0;
+  border-left: 16px solid #ffffff;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  filter: drop-shadow(0 0 12px rgba(255,255,255,.65));
+  z-index: 9;
+}
+
+/* Care/pharmacy: plus mark */
+.avatar-profile-care::before {
+  content: "+";
+  position: absolute;
+  right: 22px;
+  top: 17px;
+  font-size: 42px;
+  font-weight: 900;
+  color: #65ffba;
+  text-shadow: 0 0 18px rgba(101,255,186,.55);
+  z-index: 9;
+}
+
+/* Quiet: softer empty mirror */
+.avatar-profile-quiet {
+  opacity: .92;
+}
+
+.avatar-profile-quiet::before {
+  content: "";
+  position: absolute;
+  inset: 20px;
+  border-radius: 24px;
+  border: 1px dashed rgba(255,255,255,.16);
+  z-index: 8;
+}
