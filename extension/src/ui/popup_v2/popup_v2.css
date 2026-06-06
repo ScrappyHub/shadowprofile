@@ -298,3 +298,34 @@ html, body {
 .badge::after {
   content: "";
 }
+
+
+/* SHADOWPROFILE_NO_SP_SITE_ICON_V1 */
+.site-icon {
+  position: relative !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  overflow: hidden !important;
+}
+
+.site-icon::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 2px solid #35d7ff;
+  border-radius: 999px;
+  box-shadow: 0 0 0 5px rgba(53,215,255,.10), 0 0 22px rgba(53,215,255,.45);
+}
+
+.site-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%,-50%);
+  border-radius: 999px;
+  background: #35d7ff;
+  box-shadow: 0 0 18px rgba(53,215,255,.75);
+}
