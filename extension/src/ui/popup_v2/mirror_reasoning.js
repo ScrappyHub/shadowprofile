@@ -90,6 +90,34 @@ export function inferMirrorProfile(domain, state = {}) {
     add(traits, ["video viewer", "recommendation feed user", "entertainment"]);
     add(behaviors, ["watching videos", "browsing recommendations", "responding to a feed"]);
     reasons.push("video or recommendation domain");
+  } else if (/keyboard|mechanicalkeyboard|keycap|switches|mouse|headset|pcpart|newegg|microcenter/.test(d)) {
+    title = "Tech Hobby / Gear Research Profile";
+    badge = "GEAR";
+    summary = "This site may see you as someone researching specialized gear, comparing products, or browsing a niche tech hobby.";
+    add(traits, ["tech hobbyist", "gear researcher", "product comparison", "niche shopper"]);
+    add(behaviors, ["researching equipment", "comparing options", "browsing specialized products", "exploring hobby gear"]);
+    reasons.push("specialized tech or hobby domain");
+  } else if (/github|gitlab|stackoverflow|npmjs|developer|docs\.|api|vercel|supabase/.test(d)) {
+    title = "Developer / Builder Profile";
+    badge = "DEV";
+    summary = "This site may see you as someone building, debugging, reading documentation, or working with software tools.";
+    add(traits, ["developer", "builder", "technical researcher", "tool user"]);
+    add(behaviors, ["reading documentation", "debugging or building", "using developer tools", "researching technical answers"]);
+    reasons.push("developer or documentation domain");
+  } else if (/reddit|discord|x\.com|twitter|facebook|instagram|threads|social/.test(d)) {
+    title = "Social / Community Profile";
+    badge = "SOCIAL";
+    summary = "This site may see you as someone browsing communities, discussions, social feeds, or interest groups.";
+    add(traits, ["community browser", "discussion reader", "social feed user"]);
+    add(behaviors, ["reading discussions", "browsing communities", "checking social activity"]);
+    reasons.push("social or community domain");
+  } else if (/wikipedia|wiktionary|britannica|archive|reference/.test(d)) {
+    title = "Reference / Learning Profile";
+    badge = "REF";
+    summary = "This site may see you as someone looking up background information, definitions, history, or reference material.";
+    add(traits, ["reference seeker", "learner", "background researcher"]);
+    add(behaviors, ["looking up information", "reading reference material", "learning context"]);
+    reasons.push("reference or encyclopedia domain");
   } else if (isFinance) {
     title = "Finance / Account Profile";
     badge = "FIN";
@@ -134,8 +162,10 @@ export function inferMirrorProfile(domain, state = {}) {
     Object.values(vendors).reduce((a,b) => a + Number(b || 0), 0);
 
   let confidence =
-    signalTotal > 12 || totalEvents > 80 || title !== "Quiet Profile"
+    signalTotal > 12 || totalEvents > 80
       ? "High"
+      : title !== "Quiet Profile"
+        ? "Medium"
       : signalTotal > 3 || totalEvents > 20
         ? "Medium"
         : "Low";
