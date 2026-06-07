@@ -141,7 +141,7 @@ export function inferMirrorProfile(domain, state = {}) {
         : "Low";
 
   let value =
-    totalEvents > 1000
+    totalEvents > 5000
       ? "High"
       : totalEvents > 40 || userActions > 2
         ? "Mid"
