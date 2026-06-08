@@ -1,4 +1,4 @@
-import { inferMirrorProfile } from "./mirror_reasoning.js";
+import { inferMirrorProfile, inspectPersistenceSources } from "./mirror_reasoning.js";
 function setAvatarProfileClass(badge){
   const avatar = document.querySelector(".avatar");
   if(!avatar) return;
@@ -154,7 +154,7 @@ async function boot(){
   setTextSafe("platformsSeen", Object.keys(safeObject(safeObject(state.request_classification).vendors)).length || 1);
   setTextSafe("sessionTime", fmtDuration(counts.duration_ms || 0));
 
-  setTextSafe("whyText", "Sites use patterns like these to personalize, rank, recommend, and predict what you may do next. ShadowProfile keeps this mirror local on your device.");
+  setTextSafe("whyText", persistenceInfo.headline + " Wiping resets ShadowProfile local mirror and browser-visible memory when permitted. It cannot erase data already stored on the website servers.");
 
   setTextSafe("evidenceText", evidence(domain,state,loaded.mode,mirror));
 

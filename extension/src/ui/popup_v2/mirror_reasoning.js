@@ -218,3 +218,56 @@ export function inferMirrorProfile(domain, state = {}) {
     reasons
   };
 }
+
+export function inspectPersistenceSources(domain, state = {}) {
+  const counts = state.counts || {};
+  const signals = state.signal_breakdown || {};
+
+  const cookieEvents = Number(counts.cookie_events || 0);
+  const storageEvents = Number(counts.storage_events || 0);
+  const totalEvents = Number(counts.total_events || 0);
+  const userActions = Number(counts.user_action_events || 0);
+
+  const sources = [];
+
+  if (cookieEvents > 0) sources.push("cookies");
+  if (storageEvents > 0) sources.push("site storage");
+  if (totalEvents > 0) sources.push("observed activity");
+  if (userActions > 0) sources.push("user actions");
+
+  for (const [name, count] of Object.entries(signals)) {
+    if (Number(count || 0) > 0) {
+      sources.push(name.replaceAll("_", " "));
+    }
+  }
+
+  const profileState =
+    cookieEvents > 0 || storageEvents > 0
+      ? "existing"
+      : totalEvents > 0
+        ? "building"
+        : "new";
+
+  const headline =
+    profileState === "existing"
+      ? "This site already left browser-visible memory."
+      : profileState === "building"
+        ? "ShadowProfile is building this mirror from live activity."
+        : "No strong browser-visible memory found yet."; 
+
+  return {
+    profile_state: profileState,
+    headline,
+    sources: [...new Set(sources.length ? sources : ["no strong sources yet"])],
+    wipe_effects: [
+      "clears ShadowProfile local mirror for this site",
+      "resets inferred profile confidence",
+      "can remove browser-visible cookies or storage only when browser permission allows"
+    ],
+    wipe_limits: [
+      "does not delete data stored on the website servers",
+      "does not delete account history held by the website",
+      "does not erase third-party records outside browser-visible storage"
+    ]
+  };
+}
