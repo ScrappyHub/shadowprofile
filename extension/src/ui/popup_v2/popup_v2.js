@@ -126,7 +126,7 @@ async function boot(){
   const state=loaded.state;
   const counts=safeObject(state.counts);
   const scores=safeObject(state.scores);
-  const mirror=buildMirror(domain,state);
+  const mirror=buildMirror(domain,state); const persistenceInfo = inspectPersistenceSources(domain,state);
   const active=loaded.mode==="DEEP_INSPECT" && loaded.deepDomain===domain;
 
   setTextSafe("siteName", domain);
