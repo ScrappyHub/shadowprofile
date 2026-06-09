@@ -9,6 +9,14 @@ function setAvatarProfileClass(badge){
     "avatar-profile-video",
     "avatar-profile-news",
     "avatar-profile-care",
+    "avatar-profile-gear",
+    "avatar-profile-home",
+    "avatar-profile-search",
+    "avatar-profile-mail",
+    "avatar-profile-dev",
+    "avatar-profile-social",
+    "avatar-profile-ref",
+    "avatar-profile-build",
     "avatar-profile-quiet"
   );
 
@@ -19,6 +27,14 @@ function setAvatarProfileClass(badge){
   else if(b === "play") avatar.classList.add("avatar-profile-video");
   else if(b === "news") avatar.classList.add("avatar-profile-news");
   else if(b === "care") avatar.classList.add("avatar-profile-care");
+  else if(b === "gear") avatar.classList.add("avatar-profile-gear");
+  else if(b === "home") avatar.classList.add("avatar-profile-home");
+  else if(b === "search") avatar.classList.add("avatar-profile-search");
+  else if(b === "mail") avatar.classList.add("avatar-profile-mail");
+  else if(b === "dev") avatar.classList.add("avatar-profile-dev");
+  else if(b === "social") avatar.classList.add("avatar-profile-social");
+  else if(b === "ref") avatar.classList.add("avatar-profile-ref");
+  else if(b === "build") avatar.classList.add("avatar-profile-build");
   else avatar.classList.add("avatar-profile-quiet");
 }
 function setTextSafe(id, value) {

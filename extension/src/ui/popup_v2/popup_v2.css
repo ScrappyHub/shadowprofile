@@ -578,3 +578,147 @@ html, body {
   font-size: 12px;
   line-height: 1.35;
 }
+
+/* SHADOWPROFILE_FALLBACK_AVATAR_VISUALS_V1 */
+.avatar-profile-gear::before {
+  content: "{}";
+  position: absolute;
+  left: 31px;
+  top: 33px;
+  font-size: 30px;
+  font-weight: 900;
+  color: #62d7ff;
+  text-shadow: 0 0 18px rgba(98,215,255,.7);
+  z-index: 9;
+}
+
+.avatar-profile-home::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 37px;
+  width: 58px;
+  height: 45px;
+  background:
+    linear-gradient(135deg, transparent 48%, #62d7ff 49%, #62d7ff 56%, transparent 57%) 0 0 / 100% 28px no-repeat,
+    linear-gradient(#62d7ff,#62d7ff) 10px 28px / 38px 4px no-repeat,
+    linear-gradient(#62d7ff,#62d7ff) 18px 36px / 22px 4px no-repeat;
+  filter: drop-shadow(0 0 14px rgba(98,215,255,.65));
+  z-index: 9;
+}
+
+.avatar-profile-search::before {
+  content: "";
+  position: absolute;
+  left: 36px;
+  top: 34px;
+  width: 38px;
+  height: 38px;
+  border: 4px solid #62d7ff;
+  border-radius: 999px;
+  box-shadow: 0 0 20px rgba(98,215,255,.55);
+  z-index: 9;
+}
+
+.avatar-profile-search::after {
+  content: "";
+  position: absolute;
+  left: 70px;
+  top: 70px;
+  width: 28px;
+  height: 5px;
+  background: #62d7ff;
+  transform: rotate(45deg);
+  border-radius: 999px;
+  z-index: 10;
+}
+
+.avatar-profile-mail::before {
+  content: "";
+  position: absolute;
+  left: 29px;
+  top: 38px;
+  width: 64px;
+  height: 42px;
+  border: 3px solid #62d7ff;
+  border-radius: 9px;
+  box-shadow: 0 0 20px rgba(98,215,255,.5);
+  z-index: 9;
+}
+
+.avatar-profile-mail::after {
+  content: "";
+  position: absolute;
+  left: 34px;
+  top: 44px;
+  width: 54px;
+  height: 28px;
+  background:
+    linear-gradient(135deg, transparent 48%, #62d7ff 49%, #62d7ff 54%, transparent 55%),
+    linear-gradient(225deg, transparent 48%, #62d7ff 49%, #62d7ff 54%, transparent 55%);
+  z-index: 10;
+}
+
+.avatar-profile-dev::before {
+  content: "</>";
+  position: absolute;
+  left: 28px;
+  top: 42px;
+  font-size: 28px;
+  font-weight: 900;
+  color: #62d7ff;
+  text-shadow: 0 0 18px rgba(98,215,255,.7);
+  z-index: 9;
+}
+
+.avatar-profile-social::before {
+  content: "";
+  position: absolute;
+  left: 30px;
+  top: 34px;
+  width: 62px;
+  height: 42px;
+  border-radius: 18px;
+  border: 3px solid #62d7ff;
+  box-shadow: 0 0 18px rgba(98,215,255,.55);
+  z-index: 9;
+}
+
+.avatar-profile-ref::before {
+  content: "i";
+  position: absolute;
+  left: 52px;
+  top: 25px;
+  font-size: 58px;
+  font-weight: 900;
+  color: #62d7ff;
+  font-family: Georgia, serif;
+  text-shadow: 0 0 18px rgba(98,215,255,.65);
+  z-index: 9;
+}
+
+.avatar-profile-build::before {
+  content: "";
+  position: absolute;
+  left: 32px;
+  top: 28px;
+  width: 58px;
+  height: 22px;
+  border-radius: 999px 999px 8px 8px;
+  background: #ffd166;
+  box-shadow: 0 0 18px rgba(255,209,102,.55);
+  z-index: 9;
+}
+
+.avatar-profile-build::after {
+  content: "";
+  position: absolute;
+  left: 43px;
+  top: 21px;
+  width: 36px;
+  height: 16px;
+  border-radius: 999px 999px 0 0;
+  border: 4px solid #ffd166;
+  border-bottom: 0;
+  z-index: 10;
+}

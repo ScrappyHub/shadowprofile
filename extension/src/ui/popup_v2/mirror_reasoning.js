@@ -155,6 +155,62 @@ export function inferMirrorProfile(domain, state = {}) {
     reasons.push("finance or account domain");
   }
 
+  /* SHADOWPROFILE_FALLBACK_ARCHETYPE_ENGINE_V1 */
+  if (title === "Quiet Profile") {
+    const hasMemory = cookieEvents > 0 || totalEvents > 0 || userActions > 0;
+
+    if (/mechanicalkeyboard|keyboard|keycap|switch|mouse|headset|pcpart|newegg|microcenter|gear/.test(d)) {
+      title = "Tech Hobby / Gear Research Profile";
+      badge = "GEAR";
+      summary = "This site may see you as someone researching specialized gear, comparing specs, or browsing a niche tech hobby."; 
+      add(traits, ["tech hobbyist", "gear researcher", "product comparison", "niche shopper"]);
+      add(behaviors, ["researching equipment", "comparing options", "checking product details", "exploring hobby gear"]);
+      reasons.push("specialized gear or hobby domain");
+    } else if (/gaf|roof|roofing|shingle|siding|contractor|construction|homedepot|lowes|homeimprovement|build|builder/.test(d)) {
+      title = "Home Improvement / Project Research Profile";
+      badge = "HOME";
+      summary = "This site may see you as someone researching a home project, materials, contractors, repairs, or property improvement."; 
+      add(traits, ["home project researcher", "repair planning", "materials research", "contractor research"]);
+      add(behaviors, ["researching products or materials", "comparing project options", "planning a repair or upgrade", "reviewing service information"]);
+      reasons.push("home improvement or project-planning domain");
+    } else if (/github|gitlab|stackoverflow|npmjs|developer|docs\.|api|vercel|supabase|cloudflare|mdn/.test(d)) {
+      title = "Developer / Builder Profile";
+      badge = "DEV";
+      summary = "This site may see you as someone building, debugging, reading documentation, or working with software tools."; 
+      add(traits, ["developer", "builder", "technical researcher", "tool user"]);
+      add(behaviors, ["reading documentation", "debugging or building", "using developer tools", "researching technical answers"]);
+      reasons.push("developer or documentation domain");
+    } else if (/reddit|discord|x\.com|twitter|facebook|instagram|threads|social|forum|community/.test(d)) {
+      title = "Social / Community Profile";
+      badge = "SOCIAL";
+      summary = "This site may see you as someone browsing communities, discussions, feeds, or interest groups."; 
+      add(traits, ["community browser", "discussion reader", "social feed user"]);
+      add(behaviors, ["reading discussions", "browsing communities", "checking social activity"]);
+      reasons.push("social or community domain");
+    } else if (/wikipedia|wiktionary|britannica|archive|reference/.test(d)) {
+      title = "Reference / Learning Profile";
+      badge = "REF";
+      summary = "This site may see you as someone looking up background information, definitions, history, or reference material."; 
+      add(traits, ["reference seeker", "learner", "background researcher"]);
+      add(behaviors, ["looking up information", "reading reference material", "learning context"]);
+      reasons.push("reference or encyclopedia domain");
+    } else if (hasMemory) {
+      title = "Emerging Site Profile";
+      badge = "BUILD";
+      summary = "ShadowProfile is still building this mirror from browser-visible memory and live activity."; 
+      add(traits, ["early profile", "browser-visible activity", "building signal"]);
+      add(behaviors, ["building a profile", "observing site behavior", "collecting local evidence"]);
+      reasons.push("early browser-visible activity");
+    } else {
+      title = "New Site Profile";
+      badge = "BUILD";
+      summary = "No strong browser-visible memory is present yet. ShadowProfile will build this mirror as activity appears."; 
+      add(traits, ["new site", "no strong memory yet"]);
+      add(behaviors, ["waiting for browser-visible evidence"]);
+      reasons.push("no strong local evidence yet");
+    }
+  }
+
   if (Number(signals.cart || 0) > 0) {
     add(traits, ["purchase intent"]);
     add(behaviors, ["using cart or checkout flows"]);
