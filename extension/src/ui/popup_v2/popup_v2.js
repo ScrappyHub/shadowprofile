@@ -117,6 +117,54 @@ function evidence(domain,state,mode,mirror){
   ].join("\n");
 }
 
+function renderProfileSources(info, state){
+  const el = document.getElementById("profileSources");
+  if(!el) return;
+
+  const counts = safeObject(state.counts);
+  const signals = safeObject(state.signal_breakdown);
+  const sources = Array.isArray(info.sources) ? info.sources : [];
+  const rows = [];
+
+  const add = (label, value, note) => rows.push({label, value, note});
+
+  add("Profile state", info.profile_state || "new", info.headline || "No strong browser-visible memory found yet.");
+
+  if(Number(counts.cookie_events || 0) > 0){
+    add("Cookies", String(counts.cookie_events), "Browser-visible cookie memory helped build this mirror.");
+  }
+
+  if(Number(counts.storage_events || 0) > 0){
+    add("Site storage", String(counts.storage_events), "Browser-visible site storage helped build this mirror.");
+  }
+
+  if(Number(counts.total_events || 0) > 0){
+    add("Observed activity", String(counts.total_events), "ShadowProfile observed local activity on this site.");
+  }
+
+  if(Number(counts.user_action_events || 0) > 0){
+    add("User actions", String(counts.user_action_events), "Clicks, visits, or interaction patterns shaped this profile.");
+  }
+
+  for(const source of sources.slice(0,8)){
+    add(pillText(source), "seen", "Used as evidence for this local mirror.");
+  }
+
+  for(const [name,count] of Object.entries(signals)){
+    if(Number(count || 0) > 0){
+      add(pillText(name), String(count), "Behavior signal observed locally.");
+    }
+  }
+
+  el.innerHTML = "";
+
+  for(const row of rows.slice(0,10)){
+    const item = document.createElement("div");
+    item.className = "source-item";
+    item.innerHTML = "<strong>" + row.label + "</strong><span>" + row.value + "</span><p>" + row.note + "</p>";
+    el.appendChild(item);
+  }
+}
 async function send(type,payload){ return chrome.runtime.sendMessage({type,payload}); }
 
 async function boot(){
@@ -153,6 +201,12 @@ async function boot(){
   setTextSafe("cookieEvents", counts.cookie_events ?? 0);
   setTextSafe("platformsSeen", Object.keys(safeObject(safeObject(state.request_classification).vendors)).length || 1);
   setTextSafe("sessionTime", fmtDuration(counts.duration_ms || 0));
+
+  setTextSafe("quickEvents", counts.total_events ?? 0);
+  setTextSafe("quickCookies", counts.cookie_events ?? 0);
+  setTextSafe("quickSources", Array.isArray(persistenceInfo.sources) ? persistenceInfo.sources.length : 0);
+  setTextSafe("quickState", persistenceInfo.profile_state || "new");
+  renderProfileSources(persistenceInfo,state);
 
   setTextSafe("whyText", persistenceInfo.headline + " Wiping resets ShadowProfile local mirror and browser-visible memory when permitted. It cannot erase data already stored on the website servers.");
 
