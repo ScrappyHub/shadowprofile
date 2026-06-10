@@ -14,9 +14,9 @@ export function inferMirrorProfile(domain, state = {}) {
   const behaviors = [];
   const reasons = [];
 
-  let title = "Quiet Profile";
-  let badge = "MIRROR";
-  let summary = "Not much is visible yet. Deep Scan can help reveal what this site may be learning from your behavior.";
+  let title = "Emerging Profile";
+  let badge = "BUILD";
+  let summary = "ShadowProfile has not observed enough browser-visible activity yet. This profile will become clearer as evidence appears.";
 
   const add = (arr, items) => {
     for (const item of items) {
@@ -35,7 +35,7 @@ export function inferMirrorProfile(domain, state = {}) {
   const isFinance = /bank|chase|paypal|stripe|coinbase|robinhood|fidelity|finance/.test(d);
 
   if (isAi) {
-    title = "Research / Problem Solving Profile";
+    title = "Problem Solver Profile";
     badge = "AI";
     summary = "This site may see you as someone asking questions, solving problems, learning, or using AI as a thinking partner.";
     add(traits, ["curious", "information seeker", "problem solver", "AI assistant user"]);
@@ -49,7 +49,7 @@ export function inferMirrorProfile(domain, state = {}) {
     add(behaviors, ["checking messages", "managing communication", "returning to an inbox", "using account-based services"]);
     reasons.push("email or inbox domain");
   } else if (isSearch) {
-    title = "Search / Information Seeking Profile";
+    title = "Information Gatherer Profile";
     badge = "SEARCH";
     summary = "This site may see you as someone looking for answers, comparing information, navigating the web, or starting research.";
     add(traits, ["information seeker", "research oriented", "web navigator", "decision maker"]);
@@ -63,7 +63,7 @@ export function inferMirrorProfile(domain, state = {}) {
     add(behaviors, ["studying or learning", "using course platforms", "researching assignments", "returning to school tools"]);
     reasons.push("education or coursework domain");
   } else if (isNews) {
-    title = "News / Media Reader Profile";
+    title = "Current Events Reader Profile";
     badge = "NEWS";
     summary = "This site may see you as someone reading stories, checking headlines, following current events, or engaging with media feeds.";
     add(traits, ["news reader", "current events", "media browsing", "information seeking"]);
@@ -77,7 +77,7 @@ export function inferMirrorProfile(domain, state = {}) {
     add(behaviors, ["browsing health products", "checking personal care items", "exploring pharmacy services"]);
     reasons.push("pharmacy or personal care domain");
   } else if (isShopping) {
-    title = "Shopping Interest Profile";
+    title = "Product Evaluator Profile";
     badge = "BAG";
     summary = "Platforms may see you as someone exploring products, comparing options, or likely to respond to shopping prompts.";
     add(traits, ["shopping", "product research", "comparison browsing"]);
@@ -112,7 +112,7 @@ export function inferMirrorProfile(domain, state = {}) {
     add(behaviors, ["reading discussions", "browsing communities", "checking social activity"]);
     reasons.push("social or community domain");
   } else if (/wikipedia|wiktionary|britannica|archive|reference/.test(d)) {
-    title = "Reference / Learning Profile";
+    title = "Knowledge Seeker Profile";
     badge = "REF";
     summary = "This site may see you as someone looking up background information, definitions, history, or reference material.";
     add(traits, ["reference seeker", "learner", "background researcher"]);
@@ -140,7 +140,7 @@ export function inferMirrorProfile(domain, state = {}) {
     add(behaviors, ["reading discussions", "browsing communities", "checking social activity"]);
     reasons.push("social or community domain");
   } else if (/wikipedia|wiktionary|britannica|archive|reference/.test(d)) {
-    title = "Reference / Learning Profile";
+    title = "Knowledge Seeker Profile";
     badge = "REF";
     summary = "This site may see you as someone looking up background information, definitions, history, or reference material.";
     add(traits, ["reference seeker", "learner", "background researcher"]);
@@ -156,7 +156,7 @@ export function inferMirrorProfile(domain, state = {}) {
   }
 
   /* SHADOWPROFILE_FALLBACK_ARCHETYPE_ENGINE_V1 */
-  if (title === "Quiet Profile") {
+  if (title === "Emerging Profile") {
     const hasMemory = cookieEvents > 0 || totalEvents > 0 || userActions > 0;
 
     if (/mechanicalkeyboard|keyboard|keycap|switch|mouse|headset|pcpart|newegg|microcenter|gear/.test(d)) {
@@ -188,7 +188,7 @@ export function inferMirrorProfile(domain, state = {}) {
       add(behaviors, ["reading discussions", "browsing communities", "checking social activity"]);
       reasons.push("social or community domain");
     } else if (/wikipedia|wiktionary|britannica|archive|reference/.test(d)) {
-      title = "Reference / Learning Profile";
+      title = "Knowledge Seeker Profile";
       badge = "REF";
       summary = "This site may see you as someone looking up background information, definitions, history, or reference material."; 
       add(traits, ["reference seeker", "learner", "background researcher"]);
@@ -197,14 +197,14 @@ export function inferMirrorProfile(domain, state = {}) {
     } else if (hasMemory) {
       title = "Emerging Site Profile";
       badge = "BUILD";
-      summary = "ShadowProfile is still building this mirror from browser-visible memory and live activity."; 
+      summary = "ShadowProfile is building this profile from browser-visible memory and live activity."; 
       add(traits, ["early profile", "browser-visible activity", "building signal"]);
       add(behaviors, ["building a profile", "observing site behavior", "collecting local evidence"]);
       reasons.push("early browser-visible activity");
     } else {
       title = "New Site Profile";
       badge = "BUILD";
-      summary = "No strong browser-visible memory is present yet. ShadowProfile will build this mirror as activity appears."; 
+      summary = "No strong browser-visible memory is present yet. ShadowProfile will build this profile as activity appears."; 
       add(traits, ["new site", "no strong memory yet"]);
       add(behaviors, ["waiting for browser-visible evidence"]);
       reasons.push("no strong local evidence yet");
@@ -237,8 +237,8 @@ export function inferMirrorProfile(domain, state = {}) {
     reasons.push("browser memory/cookie activity");
   }
 
-  if (traits.length === 0) traits.push("low signal");
-  if (behaviors.length === 0) behaviors.push("not enough behavior yet");
+  if (traits.length === 0) traits.push("limited evidence");
+  if (behaviors.length === 0) behaviors.push("waiting for browser-visible evidence");
 
   const signalTotal =
     Object.values(signals).reduce((a,b) => a + Number(b || 0), 0) +
@@ -248,7 +248,7 @@ export function inferMirrorProfile(domain, state = {}) {
   let confidence =
     signalTotal > 12 || totalEvents > 80
       ? "High"
-      : title !== "Quiet Profile"
+      : title !== "Emerging Profile"
         ? "Medium"
       : signalTotal > 3 || totalEvents > 20
         ? "Medium"
@@ -261,7 +261,7 @@ export function inferMirrorProfile(domain, state = {}) {
         ? "Mid"
         : "Low";
 
-  if (title !== "Quiet Profile" && value === "Low") value = "Mid";
+  if (title !== "Emerging Profile" && value === "Low") value = "Mid";
 
   return {
     title,
@@ -308,7 +308,7 @@ export function inspectPersistenceSources(domain, state = {}) {
     profileState === "existing"
       ? "This site already left browser-visible memory."
       : profileState === "building"
-        ? "ShadowProfile is building this mirror from live activity."
+        ? "ShadowProfile is building this profile from live activity."
         : "No strong browser-visible memory found yet."; 
 
   return {
@@ -316,7 +316,7 @@ export function inspectPersistenceSources(domain, state = {}) {
     headline,
     sources: [...new Set(sources.length ? sources : ["no strong sources yet"])],
     wipe_effects: [
-      "clears ShadowProfile local mirror for this site",
+      "clears ShadowProfile local profile for this site",
       "resets inferred profile confidence",
       "can remove browser-visible cookies or storage only when browser permission allows"
     ],

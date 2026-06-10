@@ -106,8 +106,8 @@ function evidence(domain,state,mode,mirror){
     "Site: " + domain,
     "Mode: " + modeText(mode),
     "Profile: " + mirror.title,
-    "Profile Read: " + mirror.confidence,
-    "Profile Strength: " + mirror.value,
+    "Site Familiarity: " + mirror.confidence,
+    "Profile Confidence: " + mirror.value,
     "",
     "What you look like:",
     mirror.interests.map(x => "- " + pillText(x)).join("\n"),
@@ -147,11 +147,11 @@ function renderProfileSources(info, state){
   add("Profile state", info.profile_state || "new", info.headline || "No strong browser-visible memory found yet.");
 
   if(Number(counts.cookie_events || 0) > 0){
-    add("Cookies", String(counts.cookie_events), "Browser-visible cookie memory helped build this mirror.");
+    add("Cookies", String(counts.cookie_events), "Browser-visible cookies helped build this profile.");
   }
 
   if(Number(counts.storage_events || 0) > 0){
-    add("Site storage", String(counts.storage_events), "Browser-visible site storage helped build this mirror.");
+    add("Site storage", String(counts.storage_events), "Browser-visible site storage helped build this profile.");
   }
 
   if(Number(counts.total_events || 0) > 0){
@@ -163,7 +163,7 @@ function renderProfileSources(info, state){
   }
 
   for(const source of sources.slice(0,8)){
-    add(pillText(source), "seen", "Used as evidence for this local mirror.");
+    add(pillText(source), "seen", "Used as evidence for this local profile.");
   }
 
   for(const [name,count] of Object.entries(signals)){
@@ -200,8 +200,8 @@ async function boot(){
   setTextSafe("profileTitle", mirror.title);
   setTextSafe("profileSummary", mirror.summary);
   setTextSafe("avatarBadge", mirror.badge); setAvatarProfileClass(mirror.badge);
-  setTextSafe("confidenceBadge", "Profile Read: " + mirror.confidence);
-  setTextSafe("valueBadge", "Profile Strength: " + mirror.value);
+  setTextSafe("confidenceBadge", "Site Familiarity: " + mirror.confidence);
+  setTextSafe("valueBadge", "Profile Confidence: " + mirror.value);
   setTextSafe("confidence", mirror.confidence);
   setTextSafe("value", mirror.value);
 
@@ -224,7 +224,7 @@ async function boot(){
   setTextSafe("quickState", persistenceInfo.profile_state || "new");
   renderProfileSources(persistenceInfo,state);
 
-  setTextSafe("whyText", persistenceInfo.headline + " Wiping resets ShadowProfile local mirror and browser-visible memory when permitted. It cannot erase data already stored on the website servers.");
+  setTextSafe("whyText", persistenceInfo.headline + " Wiping resets ShadowProfile local profile and browser-visible memory when permitted. It cannot erase data already stored on the website servers.");
 
   setTextSafe("evidenceText", evidence(domain,state,loaded.mode,mirror));
 

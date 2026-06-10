@@ -8,10 +8,10 @@
 <body>
   <aside class="sidebar">
     <div class="brand"><div class="logo"></div><strong>ShadowProfile</strong></div>
-    <div class="status">Local mirror workbench</div>
-    <button id="refreshBtn">Refresh Mirror</button>
-    <button id="exportBtn">Export Full Profile</button>
-    <button id="resetBtn" class="danger">Reset Browser Mirror</button>
+    <div class="status">Profile investigation workbench</div>
+    <button id="refreshBtn">Refresh Evidence</button>
+    <button id="exportBtn">Export Profile Report</button>
+    <button id="resetBtn" class="danger">Clear Local Profile</button>
     <div class="privacy">Local-first. No cloud profile. You stay in control.</div>
   </aside>
 
@@ -24,12 +24,12 @@
 
       <div>
         <div class="eyebrow">Your ShadowProfile</div>
-        <h1 id="profileTitle">Building your browser mirror...</h1>
+        <h1 id="profileTitle">Building your browser profile...</h1>
         <p id="profileSummary">ShadowProfile builds this locally from browser-visible activity.</p>
 
         <div class="chips">
-          <span id="readChip">Profile Read: --</span>
-          <span id="strengthChip">Profile Strength: --</span>
+          <span id="readChip">Site Familiarity: --</span>
+          <span id="strengthChip">Profile Confidence: --</span>
           <span id="domainChip">Sites Seen: --</span>
         </div>
       </div>
@@ -64,7 +64,7 @@
     </section>
 
     <section class="card">
-      <h2>Evidence details</h2>
+      <h2>Why ShadowProfile thinks this</h2>
       <pre id="evidence">Loading...</pre>
     </section>
   </main>

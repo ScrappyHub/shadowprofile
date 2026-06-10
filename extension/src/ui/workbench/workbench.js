@@ -98,10 +98,10 @@ async function load(){
       : summaryFor(category);
 
   $("readChip").textContent =
-    "Profile Read: " + (totalEvents > 2500 ? "High" : totalEvents > 500 ? "Medium" : "Low");
+    "Site Familiarity: " + (totalEvents > 2500 ? "High" : totalEvents > 500 ? "Medium" : "Low");
 
   $("strengthChip").textContent =
-    "Profile Strength: " + (totalEvents > 1000 ? "High" : totalEvents > 100 ? "Mid" : "Low");
+    "Profile Confidence: " + (totalEvents > 1000 ? "High" : totalEvents > 100 ? "Mid" : "Low");
 
   $("domainChip").textContent =
     "Sites Seen: " + String(domains.length || Object.keys(all).length || 0);
