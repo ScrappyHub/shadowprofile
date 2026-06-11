@@ -1,3 +1,83 @@
+const SIGNAL_LABELS = {
+  beacon: "Background telemetry requests",
+  telemetry: "Usage measurement activity",
+  tracking_pixel: "Tracking pixels",
+  recommendation: "Recommendation activity",
+  cart: "Shopping/cart activity",
+  checkout: "Checkout activity",
+  search: "Search behavior",
+  ai: "AI interaction patterns",
+  news: "News reading activity",
+  video_delivery: "Video delivery activity",
+  video: "Video engagement activity",
+  third_party: "Third-party network activity"
+};
+
+function friendlySignalName(name){
+  const key = String(name || "");
+  return SIGNAL_LABELS[key] || pillText(key);
+}
+
+function profileMaturity(counts){
+  const c = safeObject(counts);
+  const totalEvents = Number(c.total_events || 0);
+  const cookieEvents = Number(c.cookie_events || 0);
+  if(cookieEvents > 0 && totalEvents > 500) return "Established";
+  if(totalEvents > 50) return "Developing";
+  return "Emerging";
+}
+
+function renderReasons(mirror, persistenceInfo){
+  const el = document.getElementById("profileReasons");
+  if(!el) return;
+
+  const reasons = Array.isArray(mirror.reasons) ? mirror.reasons : [];
+  const rendered = [];
+
+  for(const reason of reasons){
+    const label = friendlyReason(reason);
+    if(label && !rendered.includes(label)) rendered.push(label);
+  }
+
+  if(persistenceInfo && persistenceInfo.profile_state === "existing" && !rendered.includes("Existing browser-visible memory found")){
+    rendered.push("Existing browser-visible memory found");
+  }
+
+  if(rendered.length === 0){
+    rendered.push("ShadowProfile is waiting for stronger browser-visible evidence.");
+  }
+
+  el.innerHTML = "";
+
+  for(const reason of rendered.slice(0,7)){
+    const item = document.createElement("div");
+    item.className = "reason-item";
+    item.textContent = "- " + reason;
+    el.appendChild(item);
+  }
+}
+
+function friendlyReason(reason){
+  const r = String(reason || "").toLowerCase();
+
+  if(r.includes("ai") || r.includes("assistant")) return "AI-related interaction patterns detected";
+  if(r.includes("repeated interaction")) return "Repeated interaction patterns observed";
+  if(r.includes("cookie") || r.includes("browser memory")) return "Existing browser-visible memory found";
+  if(r.includes("telemetry")) return "Background telemetry activity detected";
+  if(r.includes("cart") || r.includes("shopping") || r.includes("purchase")) return "Shopping and purchase-intent behavior observed";
+  if(r.includes("recommendation")) return "Recommendation systems were active";
+  if(r.includes("news") || r.includes("media")) return "News or media-reading activity detected";
+  if(r.includes("search")) return "Search and information-gathering behavior detected";
+  if(r.includes("education") || r.includes("coursework")) return "Learning or coursework activity detected";
+  if(r.includes("developer") || r.includes("documentation")) return "Developer or technical research activity detected";
+  if(r.includes("home improvement")) return "Home project research activity detected";
+  if(r.includes("reference")) return "Reference or learning behavior detected";
+  if(r.includes("early")) return "Early browser-visible activity detected";
+  if(r.includes("no strong")) return "No strong browser-visible evidence yet";
+
+  return reason ? reason.charAt(0).toUpperCase() + reason.slice(1) : "";
+}
+
 import { inferMirrorProfile, inspectPersistenceSources } from "./mirror_reasoning.js";
 function setAvatarProfileClass(badge){
   const avatar = document.querySelector(".avatar");
@@ -148,9 +228,8 @@ function renderProfileSources(info, state){
   const signalRows = Object.entries(signals)
     .filter(([name,count]) => Number(count || 0) > 0)
     .map(([name,count]) => ({
-      label: pillText(name),
-      value: String(count),
-      note: "Behavior signal observed locally."
+      label: friendlySignalName(name),
+      value: String(count)
     }));
 
   const stateLabel =
@@ -169,27 +248,27 @@ function renderProfileSources(info, state){
   });
 
   rows.push({
-    label: "Cookies",
+    label: "Cookies found",
     value: String(cookieCount),
-    note: cookieCount > 0 ? "Browser-visible cookies helped build this profile." : "No browser-visible cookie evidence yet."
+    note: cookieCount > 0 ? cookieCount + " browser-visible cookie observations detected." : "No browser-visible cookie evidence yet."
   });
 
   rows.push({
-    label: "Activity history",
-    value: String(eventCount),
-    note: eventCount > 0 ? "Observed local activity helped shape this profile." : "No observed activity yet."
+    label: "Observed activity",
+    value: eventCount + " events",
+    note: eventCount > 0 ? "Local site activity helped shape this profile." : "No observed activity yet."
   });
 
   rows.push({
-    label: "User interaction",
-    value: String(actionCount),
+    label: "Interaction history",
+    value: actionCount + " actions",
     note: actionCount > 0 ? "Clicks, visits, or interaction patterns shaped this profile." : "No interaction pattern observed yet."
   });
 
   if(storageCount > 0){
     rows.push({
       label: "Site storage",
-      value: String(storageCount),
+      value: storageCount + " records",
       note: "Browser-visible site storage helped build this profile."
     });
   }
@@ -260,7 +339,7 @@ async function boot(){
   setTextSafe("profileSummary", mirror.summary);
   setTextSafe("avatarBadge", mirror.badge); setAvatarProfileClass(mirror.badge);
   setTextSafe("confidenceBadge", "Site Familiarity: " + mirror.confidence);
-  setTextSafe("valueBadge", "Profile Confidence: " + mirror.value);
+  setTextSafe("valueBadge", "Profile Confidence: " + mirror.value); setTextSafe("maturityBadge", "Profile Maturity: " + profileMaturity(counts));
   setTextSafe("confidence", mirror.confidence);
   setTextSafe("value", mirror.value);
 
@@ -282,6 +361,7 @@ async function boot(){
   setTextSafe("quickSources", Array.isArray(persistenceInfo.sources) ? persistenceInfo.sources.length : 0);
   setTextSafe("quickState", persistenceInfo.profile_state || "new");
   renderProfileSources(persistenceInfo,state);
+  renderReasons(mirror,persistenceInfo);
 
   setTextSafe("whyText", persistenceInfo.headline + " Wiping resets ShadowProfile local profile and browser-visible memory when permitted. It cannot erase data already stored on the website servers.");
 

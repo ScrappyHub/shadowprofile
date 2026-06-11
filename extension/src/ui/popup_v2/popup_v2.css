@@ -846,3 +846,20 @@ html, body {
   font-size: 12px !important;
   line-height: 1.38 !important;
 }
+
+/* SHADOWPROFILE_REASON_AND_SIGNAL_POLISH_V1 */
+.reason-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 2px;
+}
+
+.reason-item {
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  border-radius: 12px;
+  padding: 9px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: .9;
+}

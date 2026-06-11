@@ -47,49 +47,49 @@ export function inferMirrorProfile(domain, state = {}) {
     summary = "This site may see you as someone managing messages, accounts, work, school, or personal communication.";
     add(traits, ["communicator", "account holder", "organized user", "returning inbox user"]);
     add(behaviors, ["checking messages", "managing communication", "returning to an inbox", "using account-based services"]);
-    reasons.push("email or inbox domain");
+    reasons.push("Communication or inbox activity detected");
   } else if (isSearch) {
     title = "Information Gatherer Profile";
     badge = "SEARCH";
     summary = "This site may see you as someone looking for answers, comparing information, navigating the web, or starting research.";
     add(traits, ["information seeker", "research oriented", "web navigator", "decision maker"]);
     add(behaviors, ["searching for answers", "comparing information", "navigating to other sites", "starting a research path"]);
-    reasons.push("search engine domain");
+    reasons.push("Search and information-gathering behavior detected");
   } else if (isSchool) {
     title = "Student / Learning Profile";
     badge = "EDU";
     summary = "This site may see you as someone studying, using course platforms, researching assignments, or returning to school tools.";
     add(traits, ["student", "information seeker", "coursework", "research mode"]);
     add(behaviors, ["studying or learning", "using course platforms", "researching assignments", "returning to school tools"]);
-    reasons.push("education or coursework domain");
+    reasons.push("Learning or coursework activity detected");
   } else if (isNews) {
     title = "Current Events Reader Profile";
     badge = "NEWS";
     summary = "This site may see you as someone reading stories, checking headlines, following current events, or engaging with media feeds.";
     add(traits, ["news reader", "current events", "media browsing", "information seeking"]);
     add(behaviors, ["reading articles", "checking headlines", "following a story", "returning to information feeds"]);
-    reasons.push("news or media domain");
+    reasons.push("News or media-reading activity detected");
   } else if (isPharmacy) {
     title = "Pharmacy / Personal Care Profile";
     badge = "CARE";
     summary = "This site may see you as someone browsing pharmacy, wellness, health, or personal care products.";
     add(traits, ["pharmacy", "personal care", "wellness browsing"]);
     add(behaviors, ["browsing health products", "checking personal care items", "exploring pharmacy services"]);
-    reasons.push("pharmacy or personal care domain");
+    reasons.push("Pharmacy or personal care browsing detected");
   } else if (isShopping) {
     title = "Product Evaluator Profile";
     badge = "BAG";
     summary = "Platforms may see you as someone exploring products, comparing options, or likely to respond to shopping prompts.";
     add(traits, ["shopping", "product research", "comparison browsing"]);
     add(behaviors, ["exploring products", "comparing options", "showing purchase intent"]);
-    reasons.push("shopping or product domain");
+    reasons.push("Shopping and product-comparison behavior detected");
   } else if (isVideo) {
     title = "Video Recommendation Profile";
     badge = "PLAY";
     summary = "Platforms may see you as a video viewer whose attention can be shaped by recommendations and repeated engagement.";
     add(traits, ["video viewer", "recommendation feed user", "entertainment"]);
     add(behaviors, ["watching videos", "browsing recommendations", "responding to a feed"]);
-    reasons.push("video or recommendation domain");
+    reasons.push("Video or recommendation-feed behavior detected");
   } else if (/keyboard|mechanicalkeyboard|keycap|switches|mouse|headset|pcpart|newegg|microcenter/.test(d)) {
     title = "Tech Hobby / Gear Research Profile";
     badge = "GEAR";
@@ -152,7 +152,7 @@ export function inferMirrorProfile(domain, state = {}) {
     summary = "This site may see you as someone managing accounts, payments, balances, or financial tools.";
     add(traits, ["account manager", "finance user", "transaction aware"]);
     add(behaviors, ["checking account information", "managing payments", "reviewing financial tools"]);
-    reasons.push("finance or account domain");
+    reasons.push("Financial or account-management activity detected");
   }
 
   /* SHADOWPROFILE_FALLBACK_ARCHETYPE_ENGINE_V1 */
@@ -214,27 +214,27 @@ export function inferMirrorProfile(domain, state = {}) {
   if (Number(signals.cart || 0) > 0) {
     add(traits, ["purchase intent"]);
     add(behaviors, ["using cart or checkout flows"]);
-    reasons.push("cart activity");
+    reasons.push("Shopping/cart behavior observed");
   }
 
   if (Number(signals.telemetry || 0) > 0) {
     add(traits, ["measured user"]);
-    reasons.push("telemetry endpoints");
+    reasons.push("Background telemetry activity detected");
   }
 
   if (Number(signals.recommendation || 0) > 0) {
     add(traits, ["recommendation target"]);
     add(behaviors, ["interacting with recommendation systems"]);
-    reasons.push("recommendation signals");
+    reasons.push("Recommendation systems were active");
   }
 
   if (totalEvents > 30 || userActions > 2) {
     add(behaviors, ["active session"]);
-    reasons.push("repeated interaction");
+    reasons.push("Repeated interaction patterns observed");
   }
 
   if (cookieEvents > 0) {
-    reasons.push("browser memory/cookie activity");
+    reasons.push("Existing browser-visible memory found");
   }
 
   if (traits.length === 0) traits.push("limited evidence");
