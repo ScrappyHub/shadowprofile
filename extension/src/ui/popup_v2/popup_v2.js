@@ -139,45 +139,104 @@ function renderProfileSources(info, state){
 
   const counts = safeObject(state.counts);
   const signals = safeObject(state.signal_breakdown);
-  const sources = Array.isArray(info.sources) ? info.sources : [];
+
+  const cookieCount = Number(counts.cookie_events || 0);
+  const storageCount = Number(counts.storage_events || 0);
+  const eventCount = Number(counts.total_events || 0);
+  const actionCount = Number(counts.user_action_events || 0);
+
+  const signalRows = Object.entries(signals)
+    .filter(([name,count]) => Number(count || 0) > 0)
+    .map(([name,count]) => ({
+      label: pillText(name),
+      value: String(count),
+      note: "Behavior signal observed locally."
+    }));
+
+  const stateLabel =
+    info.profile_state === "existing"
+      ? "Existing browser memory"
+      : info.profile_state === "building"
+        ? "Building profile"
+        : "Watching for evidence";
+
   const rows = [];
 
-  const add = (label, value, note) => rows.push({label, value, note});
+  rows.push({
+    label: "Profile state",
+    value: stateLabel,
+    note: info.headline || "ShadowProfile is checking browser-visible evidence."
+  });
 
-  add("Profile state", info.profile_state || "new", info.headline || "No strong browser-visible memory found yet.");
+  rows.push({
+    label: "Cookies",
+    value: String(cookieCount),
+    note: cookieCount > 0 ? "Browser-visible cookies helped build this profile." : "No browser-visible cookie evidence yet."
+  });
 
-  if(Number(counts.cookie_events || 0) > 0){
-    add("Cookies", String(counts.cookie_events), "Browser-visible cookies helped build this profile.");
+  rows.push({
+    label: "Activity history",
+    value: String(eventCount),
+    note: eventCount > 0 ? "Observed local activity helped shape this profile." : "No observed activity yet."
+  });
+
+  rows.push({
+    label: "User interaction",
+    value: String(actionCount),
+    note: actionCount > 0 ? "Clicks, visits, or interaction patterns shaped this profile." : "No interaction pattern observed yet."
+  });
+
+  if(storageCount > 0){
+    rows.push({
+      label: "Site storage",
+      value: String(storageCount),
+      note: "Browser-visible site storage helped build this profile."
+    });
   }
 
-  if(Number(counts.storage_events || 0) > 0){
-    add("Site storage", String(counts.storage_events), "Browser-visible site storage helped build this profile.");
+  if(signalRows.length > 0){
+    rows.push({
+      label: "Behavior signals",
+      value: String(signalRows.length),
+      note: signalRows.map(x => x.label + " (" + x.value + ")").join(", ")
+    });
   }
 
-  if(Number(counts.total_events || 0) > 0){
-    add("Observed activity", String(counts.total_events), "ShadowProfile observed local activity on this site.");
-  }
+  rows.push({
+    label: "What wiping changes",
+    value: "Local only",
+    note: "Clears the ShadowProfile local profile and resets local confidence. It may remove visible browser storage when permission allows."
+  });
 
-  if(Number(counts.user_action_events || 0) > 0){
-    add("User actions", String(counts.user_action_events), "Clicks, visits, or interaction patterns shaped this profile.");
-  }
-
-  for(const source of sources.slice(0,8)){
-    add(pillText(source), "seen", "Used as evidence for this local profile.");
-  }
-
-  for(const [name,count] of Object.entries(signals)){
-    if(Number(count || 0) > 0){
-      add(pillText(name), String(count), "Behavior signal observed locally.");
-    }
-  }
+  rows.push({
+    label: "What wiping cannot erase",
+    value: "Server data",
+    note: "It cannot delete account history, website server records, or third-party data already collected outside browser-visible storage."
+  });
 
   el.innerHTML = "";
 
-  for(const row of rows.slice(0,10)){
+  for(const row of rows){
     const item = document.createElement("div");
     item.className = "source-item";
-    item.innerHTML = "<strong>" + row.label + "</strong><span>" + row.value + "</span><p>" + row.note + "</p>";
+
+    const top = document.createElement("div");
+    top.className = "source-top";
+
+    const label = document.createElement("strong");
+    label.textContent = row.label;
+
+    const value = document.createElement("span");
+    value.className = "source-value";
+    value.textContent = row.value;
+
+    const note = document.createElement("p");
+    note.textContent = row.note;
+
+    top.appendChild(label);
+    top.appendChild(value);
+    item.appendChild(top);
+    item.appendChild(note);
     el.appendChild(item);
   }
 }

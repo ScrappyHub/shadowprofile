@@ -805,3 +805,44 @@ html, body {
   opacity: .72 !important;
   font-size: 12px !important;
 }
+
+/* SHADOWPROFILE_SOURCE_RENDERER_POLISH_V1 */
+.source-list {
+  display: grid !important;
+  gap: 10px !important;
+  margin-top: 12px !important;
+}
+
+.source-item {
+  border: 1px solid rgba(255,255,255,.11) !important;
+  background: rgba(0,0,0,.22) !important;
+  border-radius: 15px !important;
+  padding: 11px 12px !important;
+}
+
+.source-top {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.source-top strong {
+  color: #ffffff !important;
+  font-size: 13px !important;
+}
+
+.source-value {
+  color: #35d7ff !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  text-align: right !important;
+  text-transform: capitalize !important;
+}
+
+.source-item p {
+  margin: 6px 0 0 !important;
+  opacity: .76 !important;
+  font-size: 12px !important;
+  line-height: 1.38 !important;
+}
