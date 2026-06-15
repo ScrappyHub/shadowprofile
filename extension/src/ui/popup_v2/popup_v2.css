@@ -863,3 +863,104 @@ html, body {
   line-height: 1.35;
   opacity: .9;
 }
+
+/* SHADOWPROFILE_FINAL_EVIDENCE_PANEL_POLISH_V1 */
+
+/* make source evidence look like product cards, not raw logs */
+.source-list {
+  gap: 8px !important;
+}
+
+.source-item {
+  padding: 12px 13px !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.055), rgba(0,0,0,.20)) !important;
+}
+
+.source-top strong {
+  font-size: 14px !important;
+}
+
+.source-value {
+  padding: 4px 9px !important;
+  border-radius: 999px !important;
+  background: rgba(53,215,255,.10) !important;
+  border: 1px solid rgba(53,215,255,.20) !important;
+}
+
+.source-item p {
+  font-size: 12.5px !important;
+  opacity: .82 !important;
+}
+
+/* reduce huge evidence wall feeling */
+.source-item:nth-child(n+5) {
+  opacity: .92;
+}
+
+/* visible reasons section */
+.evidence-open {
+  margin-top: 14px;
+}
+
+.evidence-open h3 {
+  margin: 0 0 10px;
+  color: #b46cff;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.reason-list {
+  display: grid !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+.reason-item {
+  border: 1px solid rgba(255,255,255,.10) !important;
+  background: rgba(0,0,0,.20) !important;
+  border-radius: 14px !important;
+  padding: 10px 11px !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: rgba(255,255,255,.92) !important;
+}
+
+/* better wipe cards */
+.source-item:nth-last-child(1),
+.source-item:nth-last-child(2) {
+  border-color: rgba(180,108,255,.22) !important;
+}
+
+/* final search icon correction */
+.avatar-profile-search::before {
+  left: 39px !important;
+  top: 30px !important;
+  width: 42px !important;
+  height: 42px !important;
+}
+
+.avatar-profile-search::after {
+  left: 73px !important;
+  top: 68px !important;
+  width: 31px !important;
+  height: 6px !important;
+}
+
+/* final shopping bag badge correction */
+.avatar-profile-shopping::before {
+  left: 40px !important;
+  top: 29px !important;
+}
+
+.avatar-profile-shopping::after {
+  left: 50px !important;
+  top: 20px !important;
+}
+
+.avatar-profile-shopping .avatar-badge,
+.avatar-profile-search .avatar-badge {
+  bottom: 10px !important;
+  right: 10px !important;
+}
