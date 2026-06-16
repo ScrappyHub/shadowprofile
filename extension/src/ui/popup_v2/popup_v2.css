@@ -964,3 +964,21 @@ html, body {
   bottom: 10px !important;
   right: 10px !important;
 }
+
+/* SHADOWPROFILE_HIDE_RAW_EXPORT_IN_POPUP_V1 */
+#evidenceText {
+  display: none !important;
+}
+
+.evidence-open {
+  padding-bottom: 16px !important;
+}
+
+.reason-list {
+  margin-bottom: 0 !important;
+}
+
+.reason-item {
+  background:
+    linear-gradient(135deg, rgba(180,108,255,.10), rgba(0,0,0,.20)) !important;
+}
