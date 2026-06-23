@@ -225,6 +225,8 @@ function renderProfileSources(info, state){
   const eventCount = Number(counts.total_events || 0);
   const actionCount = Number(counts.user_action_events || 0);
 
+  const plural = (n,singular,pluralText) => Number(n) === 1 ? singular : (pluralText || singular + "s");
+
   const signalRows = Object.entries(signals)
     .filter(([name,count]) => Number(count || 0) > 0)
     .map(([name,count]) => ({
@@ -250,19 +252,19 @@ function renderProfileSources(info, state){
   rows.push({
     label: "Cookies found",
     value: String(cookieCount),
-    note: cookieCount > 0 ? cookieCount + " browser-visible cookie observations detected." : "No browser-visible cookie evidence yet."
+    note: cookieCount > 0 ? cookieCount + " " + plural(cookieCount, "browser-visible cookie observation") + " detected." : "No browser-visible cookie evidence yet."
   });
 
   rows.push({
     label: "Observed activity",
-    value: eventCount + " events",
-    note: eventCount > 0 ? "Local site activity helped shape this profile." : "No observed activity yet."
+    value: eventCount + " " + plural(eventCount, "event"),
+    note: eventCount > 0 ? eventCount + " " + plural(eventCount, "event") + " observed locally." : "No observed activity yet."
   });
 
   rows.push({
     label: "Interaction history",
-    value: actionCount + " actions",
-    note: actionCount > 0 ? "Clicks, visits, or interaction patterns shaped this profile." : "No interaction pattern observed yet."
+    value: actionCount + " " + plural(actionCount, "action"),
+    note: actionCount > 0 ? actionCount + " " + plural(actionCount, "interaction") + " observed locally." : "No interaction pattern observed yet."
   });
 
   if(storageCount > 0){

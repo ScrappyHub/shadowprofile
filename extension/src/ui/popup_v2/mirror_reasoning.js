@@ -263,6 +263,12 @@ export function inferMirrorProfile(domain, state = {}) {
 
   if (title !== "Emerging Profile" && value === "Low") value = "Mid";
 
+  if (title !== "Emerging Profile" && evidenceIsThin(totalEvents, userActions, cookieEvents)) {
+    title = "Possible " + title;
+    confidence = confidence === "High" ? "Medium" : confidence;
+    value = "Low";
+  }
+
   return {
     title,
     badge,
@@ -273,6 +279,10 @@ export function inferMirrorProfile(domain, state = {}) {
     value,
     reasons
   };
+}
+
+function evidenceIsThin(totalEvents, userActions, cookieEvents){
+  return Number(totalEvents || 0) < 10 && Number(userActions || 0) < 2 && Number(cookieEvents || 0) <= 1;
 }
 
 export function inspectPersistenceSources(domain, state = {}) {
