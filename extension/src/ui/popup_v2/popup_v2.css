@@ -982,3 +982,60 @@ html, body {
   background:
     linear-gradient(135deg, rgba(180,108,255,.10), rgba(0,0,0,.20)) !important;
 }
+
+/* SHADOWPROFILE_HERO_NO_OVERLAP_V1 */
+.profile-card,
+.hero-card,
+.card.profile {
+  display: grid !important;
+  grid-template-columns: 188px minmax(0, 1fr) !important;
+  gap: 22px !important;
+  align-items: center !important;
+}
+
+.avatar,
+.profile-avatar {
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
+  height: 150px !important;
+  margin: 0 auto !important;
+  flex: 0 0 150px !important;
+}
+
+.profile-card h1,
+.hero-card h1,
+.card.profile h1 {
+  font-size: 31px !important;
+  line-height: 1.05 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.profile-card p,
+.hero-card p,
+.card.profile p {
+  max-width: 100% !important;
+}
+
+@media (max-width: 560px) {
+  .profile-card,
+  .hero-card,
+  .card.profile {
+    grid-template-columns: 154px minmax(0, 1fr) !important;
+    gap: 18px !important;
+  }
+
+  .avatar,
+  .profile-avatar {
+    width: 126px !important;
+    min-width: 126px !important;
+    max-width: 126px !important;
+    height: 126px !important;
+  }
+
+  .profile-card h1,
+  .hero-card h1,
+  .card.profile h1 {
+    font-size: 27px !important;
+  }
+}
