@@ -1039,3 +1039,41 @@ html, body {
     font-size: 27px !important;
   }
 }
+
+/* SHADOWPROFILE_NO_AVATAR_TEXT_BADGES_V1 */
+.avatar-badge,
+#avatarBadge {
+  display: none !important;
+}
+
+.avatar-profile-shopping::before,
+.avatar-profile-news::before,
+.avatar-profile-search::before,
+.avatar-profile-ai::before,
+.avatar-profile-video::before,
+.avatar-profile-care::before,
+.avatar-profile-gear::before,
+.avatar-profile-home::before,
+.avatar-profile-mail::before,
+.avatar-profile-dev::before,
+.avatar-profile-social::before,
+.avatar-profile-ref::before,
+.avatar-profile-build::before {
+  z-index: 10 !important;
+}
+
+.avatar-profile-shopping::after,
+.avatar-profile-news::after,
+.avatar-profile-search::after,
+.avatar-profile-ai::after,
+.avatar-profile-video::after,
+.avatar-profile-care::after,
+.avatar-profile-gear::after,
+.avatar-profile-home::after,
+.avatar-profile-mail::after,
+.avatar-profile-dev::after,
+.avatar-profile-social::after,
+.avatar-profile-ref::after,
+.avatar-profile-build::after {
+  z-index: 11 !important;
+}
