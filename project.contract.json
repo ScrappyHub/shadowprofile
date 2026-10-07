@@ -1,0 +1,29 @@
+{
+    "project_id":  "shadowprofile",
+    "canonical_name":  "ShadowProfile",
+    "ecosystem":  {
+                      "registry_schema":  "constellation.service.registry.v1",
+                      "service_id":  "shadowprofile",
+                      "layer":  "protection.browser-forensics",
+                      "role":  "Forensic browser-visible tracking and personalization inspector.",
+                      "standalone_first":  true,
+                      "upstream_services":  [
+                                                "cookiegate"
+                                            ],
+                      "downstream_users":  [
+                                               "operators",
+                                               "contract-registry"
+                                           ],
+                      "contract_families":  [
+                                                "browser",
+                                                "signal",
+                                                "score",
+                                                "session",
+                                                "comparison",
+                                                "report"
+                                            ],
+                      "service_map_path":  "C:\\dev\\Constellation\\ecosystem\\SERVICE_MAP.md",
+                      "registry_path":  "C:\\dev\\Constellation\\registry\\services.json",
+                      "integration_doc_path":  "docs/canonical/ECOSYSTEM_INTEGRATION.md"
+                  }
+}
